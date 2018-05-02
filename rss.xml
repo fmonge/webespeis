@@ -1,0 +1,1283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>JáquerEspeis</title><link>http://jaquerespeis.org/</link><description></description><atom:link href="http://jaquerespeis.org/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>es</language><copyright>Contents © 2018 &lt;a href="mailto:jaquerespeis@googlegroups.com"&gt;JáquerEspeis&lt;/a&gt; 
+&lt;a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"&gt;&lt;img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /&gt;&lt;/a&gt;Publicado bajo una licencia &lt;a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"&gt;Creative Commons Attribution-ShareAlike 4.0 International&lt;/a&gt;.
+</copyright><lastBuildDate>Wed, 02 May 2018 22:31:00 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Firmador de documentos PDF para Firma Digital de Costa Rica</title><link>http://jaquerespeis.org/posts/firmador-de-documentos-pdf-para-firma-digital-de-costa-rica/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;p&gt;En artículos anteriores había publicado cómo firmar documentos utilizando un firmador de escritorio usando software libre (dss-standalone). La herramienta era relativamente difícil de configurar, así que he creado mi propia herramienta y la publico también bajo una licencia de software libre. El nombre no es muy original, se llama firmador-pdf.&lt;/p&gt;
+&lt;p&gt;Esta herramienta cubre una necesidad personal pero también espero que resulte útil para todas las personas interesadas en firmar documentos PDF que cumplan la &lt;a href="https://www.mifirmadigital.go.cr/wp-content/uploads/2016/03/DCFD-Poli%CC%81tica-de-Formato-Oficial-v1.0.pdf"&gt;Política de Formatos Oficiales de los Documentos Electrónicos Firmados Digitalmente&lt;/a&gt; publicada por el MICITT.&lt;/p&gt;
+&lt;p&gt;Las ventajas con respecto a la anterior herramienta es que obtiene la cadena de certificados automáticamente y supera la validación en herramientas de terceros como LibreFirma. La descarga es relativamente ligera (13 MB) y requiere tener instalado Java 8 y los controladores de Soporte Firma Digital.&lt;/p&gt;
+&lt;p&gt;La firma generada cumple con el perfil estándar PAdES Baseline LTA (equivalente a PAdES-LTV).&lt;/p&gt;
+&lt;h2&gt;Descarga&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://jaquerespeis.org/descargas/firmador.jar"&gt;Descargar Firmador PDF&lt;/a&gt; para Windows, GNU/Linux y macOS (13 MB). Versión 1.0.1 (&lt;a href="https://github.com/fdelapena/firmador-pdf/compare/1.0.0...1.0.1"&gt;cambios&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;El código fuente se puede obtener en mi &lt;a href="https://github.com/fdelapena/firmador-pdf"&gt;repositorio de firmador-pdf en GitHub&lt;/a&gt;. La licencia del programa es &lt;a href="https://www.gnu.org/licenses/gpl.html"&gt;GPL-3.0&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Para ejecutarlo en Windows hay que hacer doble clic en el archivo jar. Para ejecutarlo en GNU/Linux hay que teclear en una terminal &lt;kbd&gt;java -jar Descargas/firmador.jar&lt;/kbd&gt;. Para ejecutarlo en macOS hay que hacer desde la carpeta de descargas en el Finder sobre el icono clic derecho -&amp;gt; abrir la primera vez, las siguientes ya se puede hacer doble clic sobre el archivo.&lt;/p&gt;</description><category>Firma digital</category><category>Software libre</category><guid>http://jaquerespeis.org/posts/firmador-de-documentos-pdf-para-firma-digital-de-costa-rica/</guid><pubDate>Fri, 13 Apr 2018 23:04:57 GMT</pubDate></item><item><title>On crowdsales and multiple inheritance</title><link>http://jaquerespeis.org/posts/esblogcrowdsales-and-multiple-inheritance/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;&lt;p&gt;On 2017 we saw a mind-blowing number of crowdsales and ICOs running in the
+Ethereum blockchain. They have proven to be a
+powerful tool to collect the funds required to start a project, and they are
+one of the most common uses for smart contracts right now. The Zeppelin team
+has been very involved in this topic,
+&lt;a href="https://blog.zeppelin.solutions/tagged/audit"&gt;auditing many crowdsale contracts&lt;/a&gt;,
+and supporting &lt;a href="https://openzeppelin.org/"&gt;OpenZeppelin&lt;/a&gt;, the most popular
+framework to build these crowdsales. What we found was a lot of contracts
+repeating the same basic concepts, with very similar code, and common
+vulnerabilities.&lt;/p&gt;
+&lt;p&gt;Earlier this year, part of the team took the task to redesign our base
+&lt;code&gt;Crowdsale&lt;/code&gt; contract in order to support a lot of new crowdsale flavors out of
+the box and to make the experience of building and publishing your own
+crowdsale more clear and secure. The idea is to make audits less necessary,
+with an architecture that is modular, that encourages reuse and that will be
+collectively reviewed. These new contracts were added to OpenZeppelin version
+&lt;code&gt;1.7.0&lt;/code&gt;, and since the release they have been widely used by our community with
+ great success. So, this is a good moment to show off :)&lt;/p&gt;
+&lt;p&gt;Let's start with a dive into
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/Crowdsale.sol"&gt;the source code of the &lt;code&gt;Crowdsale&lt;/code&gt; base contract&lt;/a&gt;.
+The first thing you will notice is a lot of comments, guiding you through the
+details of the OpenZeppelin crowdsale architecture. They explain that some
+functions are the core of the architecture and should not be overriden, like
+&lt;code&gt;buyTokens&lt;/code&gt;. Some others like &lt;code&gt;_preValidatePurchase&lt;/code&gt; can be overriden to
+implement the requirements of your crowdsale, but that extra behavior should
+be concatenated with the one of the parent by calling &lt;code&gt;super&lt;/code&gt;, to preserve the
+validations from the  base contract. Some functions like
+&lt;code&gt;_postValidatePurchase&lt;/code&gt; can be just added as hooks in other parts of the
+crowdsale's lifecycle.&lt;/p&gt;
+&lt;p&gt;Building on top of this base, we now provide some contracts for common
+crowdsale scenarios involving
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts/crowdsale/distribution"&gt;distribution&lt;/a&gt;,
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts/crowdsale/emission"&gt;emission&lt;/a&gt;,
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts/crowdsale/price"&gt;price&lt;/a&gt;,
+and
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts/crowdsale/validation"&gt;validation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;So, let's say that you want to set a goal for your crowdsale and if it's not
+met by the time the sale finishes, you want to refund all your investors. For
+that, you can use the
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/distribution/RefundableCrowdsale.sol"&gt;RefundableCrowdsale contract&lt;/a&gt;,
+which overrides the base &lt;code&gt;_forwardFunds&lt;/code&gt; behavior to send the funds to a fancy
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/distribution/utils/RefundVault.sol"&gt;RefundVault&lt;/a&gt;
+while the crowdsale is in progress, instead of sending them directly to the
+wallet of the crowdsale owner.&lt;/p&gt;
+&lt;p&gt;Another common scenario is when you want the tokens to be minted when they are
+purchased. For that, take a look at the
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/emission/MintedCrowdsale.sol"&gt;MintedCrowdsale contract&lt;/a&gt;,
+which overrides the simple &lt;code&gt;_deliverTokens&lt;/code&gt; behavior of the base class to call
+instead the &lt;code&gt;mint&lt;/code&gt; function of an
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/token/ERC20/MintableToken.sol"&gt;ERC20 Mintable token&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;What if we want to do something more interesting with the price of the tokens?
+The base &lt;code&gt;Crowdsale&lt;/code&gt; contract defines a constant rate between tokens and wei,
+but if we override &lt;code&gt;_getTokenAmount&lt;/code&gt;, we could do something like increasing
+the price as the closing time of the crowdsale approaches. That's exactly what
+the
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/price/IncreasingPriceCrowdsale.sol"&gt;IncreasingPriceCrowdsale contract&lt;/a&gt;
+does.&lt;/p&gt;
+&lt;p&gt;To get started developing and deploying a crowdsale using the OpenZeppelin
+framework, Gustavo Guimaraes published a nice
+&lt;a href="https://blog.zeppelin.solutions/how-to-create-token-and-initial-coin-offering-contracts-using-truffle-openzeppelin-1b7a5dae99b6"&gt;guide where you will see in action a crowdsale that is timed &lt;strong&gt;and&lt;/strong&gt; minted&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;These are just a few examples. I invite you to explore the
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts/crowdsale"&gt;OpenZeppelin crowdsale contracts&lt;/a&gt;
+to see all the new flavors that you can easily use to fund your cool idea;
+and take a look at the
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/examples/SampleCrowdsale.sol"&gt;SampleCrowdsale contract&lt;/a&gt;,
+a more complex scenario that comes with full
+&lt;a href="https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/examples/SampleCrowdsale.test.js"&gt;test coverage&lt;/a&gt;.
+If you like OpenZeppelin, remember that you are welcome into
+&lt;a href="https://slack.openzeppelin.org/"&gt;our vibrating community&lt;/a&gt; to help us adding new
+contracts or improving the existing ones.&lt;/p&gt;
+&lt;p&gt;On the repo you will also find that all these contracts are very well tested. And
+as we have seen, the new architecture is clearer and safer, with each contract
+explaining the functions that you can or can't override, and how to do it.
+However, you should be extra careful when combining them. It's not the same to
+have three contracts with one condition than to have one contract with three
+conditions. The combination increases the attack surface, so you need to have
+a good idea of what you want to achieve, and know the implementation details of
+the tools you are using.&lt;/p&gt;
+&lt;p&gt;Before you go ahead and deploy a complex crowdsale that combines some of our
+contracts, I would like to spend some time going deep into how Solidity works
+when you combine contracts through multiple inheritance, like Gustavo did in
+his guide to make a contract that inherits from &lt;code&gt;TimedCrowdsale&lt;/code&gt; &lt;strong&gt;and&lt;/strong&gt; from
+&lt;code&gt;MintedCrowdsale&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Multiple inheritance is hard, and it can get very confusing if you abuse it.
+Some languages don't support it at all; but it is becoming a very common
+pattern on Solidity.&lt;/p&gt;
+&lt;p&gt;The problem, from the point of view of the programmer, is to understand the
+order of the calls when a contract has multiple parents. Let's say we have a
+base contract &lt;code&gt;A&lt;/code&gt;, with a function named &lt;code&gt;f&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;contract A {
+  function f() {
+    somethingA();
+  }
+}
+&lt;/pre&gt;
+
+
+&lt;p&gt;Then we have two contracts &lt;code&gt;B&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt;, both inherit from &lt;code&gt;A&lt;/code&gt; and override &lt;code&gt;f&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;contract B is A {
+  function f() {
+    somethingB();
+    super.f();
+  }
+}
+
+contract C is A {
+  function f() {
+    somethingC();
+    super.f();
+  }
+}
+&lt;/pre&gt;
+
+
+&lt;p&gt;And finaly we have a contract &lt;code&gt;D&lt;/code&gt;, which inherits from &lt;code&gt;B&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt;, and
+overrides &lt;code&gt;f&lt;/code&gt; too:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;contract D is B, C {
+  function f() {
+    somethingD();
+    super.f();
+  }
+}
+&lt;/pre&gt;
+
+
+&lt;p&gt;What happens when you call &lt;code&gt;D.f&lt;/code&gt;?&lt;/p&gt;
+&lt;p&gt;This is called the diamond problem, because we end up with a diamond-shaped
+inheritance diagram:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Diamond_inheritance.svg/180px-Diamond_inheritance.svg.png"&gt;&lt;img alt="Diamond inheritance problem" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Diamond_inheritance.svg/180px-Diamond_inheritance.svg.png"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;(the image is from wikipedia)&lt;/p&gt;
+&lt;p&gt;To solve it, Solidity uses C3 linearization, also called Method Resolution
+Order (MRO). This means that it will linearize the inheritance graph. If &lt;code&gt;D&lt;/code&gt;
+is defined as:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;contract D is B, C {}
+&lt;/pre&gt;
+
+
+&lt;p&gt;then &lt;code&gt;D.f&lt;/code&gt; will call:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;somethingD();
+somethingC();
+somethingB();
+somethingA();
+&lt;/pre&gt;
+
+
+&lt;p&gt;When &lt;code&gt;D&lt;/code&gt; inherits from &lt;code&gt;B, C&lt;/code&gt;, the linearization results in D→ C→ B→ A. This
+means that &lt;code&gt;super&lt;/code&gt; on &lt;code&gt;D&lt;/code&gt; calls &lt;code&gt;C&lt;/code&gt;. And you might be a little surprised by the
+fact that calling &lt;code&gt;super&lt;/code&gt; on &lt;code&gt;C&lt;/code&gt; will result on a call to &lt;code&gt;B&lt;/code&gt; instead of &lt;code&gt;A&lt;/code&gt;,
+even though &lt;code&gt;C&lt;/code&gt; doesn't inherit from &lt;code&gt;B&lt;/code&gt;. Finally, &lt;code&gt;super&lt;/code&gt; on &lt;code&gt;B&lt;/code&gt; will call
+&lt;code&gt;A&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If &lt;code&gt;D&lt;/code&gt; is instead defined as:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;contract D is C, B {}
+&lt;/pre&gt;
+
+
+&lt;p&gt;then &lt;code&gt;D.f&lt;/code&gt; will call:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;somethingD();
+somethingB();
+somethingC();
+somethingA();
+&lt;/pre&gt;
+
+
+&lt;p&gt;When &lt;code&gt;D&lt;/code&gt; inherits from &lt;code&gt;C, B&lt;/code&gt;, the linearization results in D→ B→ C→ A.&lt;/p&gt;
+&lt;p&gt;Notice here that the order in which you declare the parent contracts matters a
+lot. If the inheritance graph is not too complex, it will be easy to see that
+the order of calls will follow the order in which the parents were declared,
+right to left. If your inheritance is more complicated than this and the
+hierarchy is not very clear, you should probably stop using multiple
+inheritance and look for an alternate solution.&lt;/p&gt;
+&lt;p&gt;I recommend you to read the wikipedia pages of
+&lt;a href="https://en.wikipedia.org/wiki/Multiple_inheritance"&gt;Multiple inheritance&lt;/a&gt; and
+&lt;a href="https://en.wikipedia.org/wiki/C3_linearization"&gt;C3 linearization&lt;/a&gt;, and the
+&lt;a href="https://solidity.readthedocs.io/en/latest/contracts.html#multiple-inheritance-and-linearization"&gt;Solidity docs about multiple inheritance&lt;/a&gt;.
+You will find in there a complete explanation of the C3 algorithm, and an
+example with a more complicated inheritance graph.&lt;/p&gt;
+&lt;p&gt;To better understand how this can impact your crowdsales, take a look at the
+case that Philip Daian brilliantly explains on his blog post
+&lt;a href="https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/"&gt;Solidity anti-patterns: Fun with inheritance DAG abuse&lt;/a&gt;.
+There, he presents a Crowdsale contract that needs "to have a whitelist
+pool of preferred investors able to buy in the pre-sale [...], along with a
+hard cap of the number of [...] tokens that can be distributed." On his first
+(deliberately) faulty implementation, he ends up with a crowdsale that checks:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;((withinPeriod &amp;amp;&amp;amp; nonZeroPurchase) &amp;amp;&amp;amp; withinCap) || (whitelist[msg.sender] &amp;amp;&amp;amp; !hasEnded())
+&lt;/pre&gt;
+
+
+&lt;p&gt;Pay close attention to the resulting condition, and notice that if a
+whitelisted investor buys tokens before the crowdsale has ended, she will be
+able to bypass the hard cap, and buy as many tokens as she wants.&lt;/p&gt;
+&lt;p&gt;By just inverting the order on which the parents are defined, he fixes the
+contract which will now check for:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;(withinPeriod &amp;amp;&amp;amp; nonZeroPurchase || (whitelist[msg.sender] &amp;amp;&amp;amp; !hasEnded())) &amp;amp;&amp;amp; withinCap
+&lt;/pre&gt;
+
+
+&lt;p&gt;Now, if the purchase attempt goes above the cap, the transaction will be
+reverted even if the sender is whitelisted.&lt;/p&gt;
+&lt;p&gt;There are some simple cases, where the order of the conditions is not
+important. By now, you should have started to suspect that the contract above
+became complicated because of the &lt;code&gt;||&lt;/code&gt; (&lt;em&gt;or&lt;/em&gt;) condition. Things are a lot easier
+when all our conditions are merged with &lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt; (&lt;em&gt;and&lt;/em&gt;), because in that case the
+order of the conditions doesn't alter the result.&lt;/p&gt;
+&lt;p&gt;Our new architecture was crafted for using &lt;code&gt;require&lt;/code&gt; instead of returning
+booleans, which works nicely to combine &lt;em&gt;and&lt;/em&gt; conditions, and to revert the
+transaction when one fails. Let's say that we have a crowdsale that should
+&lt;strong&gt;only&lt;/strong&gt; allow whitelisted investors to buy tokens while the sale is open
+&lt;strong&gt;and&lt;/strong&gt; the cap has not been reached. In this
+case, the condition to check would be (in pseudocode):&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;require(hasStarted() &amp;amp;&amp;amp; !hasEnded())
+require(isInWhiteList(msg.sender))
+require(isWithinCap(msg.value))
+&lt;/pre&gt;
+
+
+&lt;p&gt;Our contract would be as simple as:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;pragma&lt;/span&gt; &lt;span class="n"&gt;solidity&lt;/span&gt; &lt;span class="o"&gt;^&lt;/span&gt;&lt;span class="mf"&gt;0.4&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="s2"&gt;"zeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="s2"&gt;"zeppelin-solidity/contracts/crowdsale/validation/WhitelistedCrowdsale.sol"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="s2"&gt;"zeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="n"&gt;contract&lt;/span&gt; &lt;span class="n"&gt;WhitelistedTimedCappedCrowdsale&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="n"&gt;TimedCrowdsale&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WhitelistedCrowdsale&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CappedCrowdsale&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+
+  &lt;span class="n"&gt;function&lt;/span&gt; &lt;span class="n"&gt;WhitelistedTimedCappedCrowdsale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;uint256&lt;/span&gt; &lt;span class="n"&gt;_rate&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;address&lt;/span&gt; &lt;span class="n"&gt;_wallet&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ERC20&lt;/span&gt; &lt;span class="n"&gt;_token&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;uint256&lt;/span&gt; &lt;span class="n"&gt;_openingTime&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;uint256&lt;/span&gt; &lt;span class="n"&gt;_closingTime&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;uint256&lt;/span&gt; &lt;span class="n"&gt;_cap&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;public&lt;/span&gt;
+    &lt;span class="n"&gt;Crowdsale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_rate&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;_wallet&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;_token&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;TimedCrowdsale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_openingTime&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;_closingTime&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;CappedCrowdsale&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_cap&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;It doesn't matter how you order the parents, all the conditions will be
+checked always. But take this with a grain of salt. All the conditions will be
+checked, but the order will be different. This can have different side-effects
+on Solidity, as some paths will execute statements that other paths won't, and
+it could lead an attacker to find a specific path that is vulnerable. Also, if
+your parent contracts are not super clear, they might be hiding an &lt;code&gt;||&lt;/code&gt;
+condition in a few hard-to-read code statements.&lt;/p&gt;
+&lt;p&gt;It's very easy to think that the parent contracts will just be magically merged
+into something that will make sense for our use case, or to make a mistake when
+we linearize them in our mind. Every use case will be different, so our
+framework can't save you from the work of organizing your contracts' hierarchy.
+You must analyze the linearization of the inheritance graph to get a clear view
+of the functions that will be called and their order, and always always add a
+full suite of automated tests for your final crowdsale contract to make sure
+that it enforces all the conditions.&lt;/p&gt;
+&lt;p&gt;To finish, I wanted to show you my repo where I will be doing
+experiments with crowdsales and their tests:
+&lt;a href="https://github.com/elopio/zeppelin-crowdsales"&gt;https://github.com/elopio/zeppelin-crowdsales&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Take a look at my
+&lt;a href="https://github.com/elopio/zeppelin-crowdsales/blob/master/contracts/PreSaleWithCapCrowdsale.sol"&gt;PreSaleWithCapCrowdsale contract&lt;/a&gt;.
+You will see that I preferred to be explicit about the conditions instead of
+using &lt;code&gt;super&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;_preValidatePurchase&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;address&lt;/span&gt; &lt;span class="nx"&gt;_beneficiary&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;uint256&lt;/span&gt; &lt;span class="nx"&gt;_weiAmount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="nx"&gt;internal&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;_beneficiary&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="nx"&gt;address&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+  &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;_weiAmount&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;block&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;timestamp&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="nx"&gt;openingTime&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nx"&gt;whitelist&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;_beneficiary&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+  &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;block&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;timestamp&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="nx"&gt;closingTime&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;weiRaised&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;_weiAmount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="nx"&gt;cap&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;I encourage you to join me on these experiments, to try different combinations
+of crowdsales and to play switching the order of the inheritance graph. We will
+learn more about the resulting code that Solidity compiles, we will improve our
+mental picture of the execution stack, and we will practice writing tests
+that fully cover all the possible paths. If you have questions, find
+errors on the implementations in OpenZeppelin, or find an alternative
+implementation that will make it easier to develop crowdsales on top of our
+contracts, please
+&lt;a href="https://slack.openzeppelin.org/"&gt;let us know by sending a message to the slack channel&lt;/a&gt;.
+I am &lt;em&gt;elopio&lt;/em&gt; in there.&lt;/p&gt;
+&lt;p&gt;A relevant experiment here is to use
+&lt;a href="https://en.wikipedia.org/wiki/Composition_over_inheritance#Benefits"&gt;composition over inheritance&lt;/a&gt;.
+In OpenZeppelin we couldn't implement an architecture based on composition
+because of the high gas costs implied, especially during deployment. That is
+one of the reasons we are now hard at work
+on &lt;a href="https://zeppelinos.org/"&gt;zeppelin_os&lt;/a&gt;, which minimizes deployment costs
+by helping you use libraries that are already on-chain. Expect exciting news
+very soon!&lt;/p&gt;
+&lt;p&gt;Thanks a lot to &lt;a href="https://github.com/ajsantander"&gt;Ale&lt;/a&gt; and
+&lt;a href="https://github.com/fiiiu"&gt;Alejo&lt;/a&gt;, who worked on these new contracts and helped
+me to understand them. &amp;lt;3&lt;/p&gt;&lt;/div&gt;</description><guid>http://jaquerespeis.org/posts/esblogcrowdsales-and-multiple-inheritance/</guid><pubDate>Sun, 08 Apr 2018 21:04:13 GMT</pubDate></item><item><title>Cambiar el mundo ¿Es posible?</title><link>http://jaquerespeis.org/posts/20180228cambiar-el-mundo-es-posible/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;
+&lt;div class=""&gt;
+&lt;div class="_1mf _1mj"&gt;Si ustedes han estado conmigo los últimos meses creo que se han dado cuenta de que este ha sido un a;o diferente para mi en algunas cosas demasiado mal, pero el 90% del tiempo ha ido demasiado bien, la &lt;span class="_247o"&gt;Comunidad Arduino Guatemala&lt;/span&gt; esta creciendo, he estado ayudando a mas personas con sus problemas tecnológicos (extra;o porque hace un par de a;os era otro tipo de ayuda la que normalmente ofrecía, pero bueno esos son otros 20 pesos :V), realmente ha sido un inicio de a;o espectacular trabajo aquí, trabajo allá, conferencia aquí, conferencia allá, ahora el que ha cambiado de cierta manera he sido yo, ya no comparto tanto en lo digital pero si me he vuelto mas allegado a las personas reales mas a un grupo de amigos de CCCGT.&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;No se, creo que crecer ya casi cumplo los 24 me ha hecho mas reservado con que cosas comparto en internet y cuales no, pero heme aqui compartiendo con todos ustedes algo que a día de hoy 27 de febrero, no puedo no compartirlo ( en eso me desahogo y tal vez llore, pero eso no lo sabrán porque están del otro lado de la pantalla, pero se que mis lectores van a intuirlo por las palabras que utilizare), Gracias a Luis Olivet por recomendarme compartirlo.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;
+&lt;div class=""&gt;
+&lt;div class="_1mf _1mj"&gt;Pero bueno muy pocos saben que formo parte de un emprendimiento llamado &lt;span class="_247o"&gt;Antigua Makerspace, el cual a groso modo esta orientado a utilizar STEEM (science, technology, engineering, entreprenuership and Math) ya un año desde que iniciamos este viaje y si ustedes piensan que es publicidad pues pueden cerrar la ventanita y seguir con sus vidas. No suelo contar mis proyectos personales por la misma razon que muchas personas lo suelen tomar a mal, pero en realidad hay muchas veces que no se como hacerlo. Bueno dejaremos mis problemas mentales para otra publicación jajaja.&lt;br&gt;
+&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Todo empezó con un mensaje, el cual decía que si podíamos apoyar para dar un taller de Robótica  a una escuela de niños con discapacidad visual( total, parcial, visión baja) la cual unas horas antes de llegar supe que era la escuela Santa Lucia( como el pueblo donde vivo ) del Comité pro ciegos y sordos. Si por aquí va la cosa, pero créanme no es el típico post donde uno se sorprende de que los niños con discapacidad tienen las mismas capacidades cognitivas que los demás, mi publicación va un poco mas allá.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Y como siempre digo que si, me gustan los retos aparte de que nunca digo que no, asi que allí empezaba el reto, el mensaje decía son 25 niños ciegos y yo en mi cabeza “Mierda, si me cuesta con niños ahora con niños ciegos me va a costar mucho mas(algo de lo cual me iba a sorprender mas adelante)”, pero como siempre he dicho la mejor manera de aprender es enseñar así que me puse en contacto con mi llamada de emergencia, para que me hiciera ganas para poder ir a la capital en la madrugada. Un par de tropiezos en nuestra logística para movernos la noche del 26 pero estábamos seguros de que de cualquier manera íbamos a ir.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Estuve bastante emocionado, durante la noche que no podía dormir ( aparte de que tenia un dolor del cuello tan feo que no podía voltear a ver a ningún lado, aun lo tengo pero ya es menos), yo y mis planes perfectos donde todo sale bien decían irse a dormir a las 10 para despertarse a las 4 bañarse e irse, la realidad fue otra, dormir a las 12:30 despertar a las 4:30 y levantarse a las 5:10, aún no estaba seguro el transporte hasta que veo el mensaje, ya voy para allá. Como buen trabajador me fui sin desayunar, madrugando por una cosa estúpida llamada trafico, yo soy del pensamiento de madrugar para viajar 300kms es una buena idea; madrugar para viajar 30-40 kms es una estupidez.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Llegando a la escuela que de fuera parece algo súper chiquito, del tamaño de unos cuantos cuartos y dos niveles, pensé: “tengo hambre”, así que fuimos a un canasto de comida que estaba en la esquina a “desayunar” con mi amigo MDR, con la pena de que de verdad yo no tenia idea de como iba a ser la cosa, fui y hable con el guardia que no tenia ni idea de que le estaba diciendo no porque no entendiera, sino que no estaba enterado de la actividad así que decidimos esperar, una hora para ser exactos, los que me  han intentado contactar saben que yo sin acceso a internet no funciono así que estaba pidiendo wifi del cel de MDR, nos acabamos 60 megas en 20 minutos ya solo nos quedaban 40 para el resto del día jaja eran las 8 am.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Ya cansado y con sueño decidí ir con el guardia e inventarle la casaca de que quería hablar con la directora aunque no sabia si era hombre o mujer el encargado, asi que le dije: “poli, mire no esta la directora es que ya es tarde”, pura casualidad fue que si era mujer xD le conté que eramos los de robótica y pues nos dejo pasar.&lt;/div&gt;
+&lt;div&gt;Era un centro educativo bastante grande, muy limpio y acogedor realmente amplio y hasta tenia parqueo en la parte de atrás. (adiós prejuicio 1), ah olvide mencionar que este proyecto es conjunto con la secretaria nacional de ciencia y tecnología, SENACYT. Realmente esperaba una mejor bienvenida de parte de uno de sus miembros, pero creo que se molesto al ver que tenia el pelo verde e iba con playera, pantalón y tenis, mientras el iba con su traje super presentable. Cuestión de gustos y comodidad supongo, que bueno que me quite los aretes del labio y no tengo tatuajes, sino ni me deja participar. No es la primera vez que me topo con personas así, así que lo mejor es ser profesionales y hacer bien tu trabajo que para eso fue que te llamaron, cuando entro en modo trabajo me irrito fácilmente cuando se meten con lo que hago, no hubo nunca discusiones ni nada solo se sentía la mala vibra. ( aclaro de una vez que de ninguna manera me insulto ni hizo ningún desprecio, fue mas como subestimacion hacia mi persona), empezamos a sacar los robots y yo no tenia ni idea de como hacerle para explicar a los niños, se me acerco el encargado y nos empezó a explicar como había sido el taller anterior ( si este era el segundo y yo aun trataba de descifrar como le hicieron el anterior).&lt;/div&gt;
+&lt;div&gt;Empezaron a llegar los niños se sentaron, empezaron a tocar la mesa cuando objeto robotico no identificado aparece. &lt;img data-attachment-id="2204" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1266/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=740" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"5","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519722380","copyright":"","focal_length":"40","iso":"200","shutter_speed":"0.016666666666667","title":"","orientation":"1"}' data-image-title="IMG_1266" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=740?w=740" class="alignnone size-full wp-image-2204" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=740" alt="IMG_1266" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1266.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Al igual que todo niño con juguete nuevo no querían soltarlo ni compartir con nadie, pero hubieron algunos veteranos ( que ya habían tomado el curso) que dijeron a su compañero mas cercano, “mira estos son los ojos” y le ponían las manos al compañero en el sensor de proximidad. Eso fue lo mejor de la mañana, compartir lo que saben y enseñar. Dejamos que los niños jugaran y como buenos niños hacían bulla y no ponían atención y aquí mi miedo porque no sabia si iban a entender o no lo que les iba a decir.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Hubo un acto protocolario pequeño y fugaz agradeciendo a todos y bueno empezamos&lt;/div&gt;
+&lt;div&gt;“Hola niños mi nombre es Yeffri soy su profesor de robótica y tengo el pelo verde”, instantáneamente las risas de los niños en ese momento se fue mi miedo y empezó mi seguridad, seguía sin saber que hacer pero estaba seguro de que iba a funcionar.&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;Les dimos los des armadores sin instrucciones de como desarmarlos y pum.&lt;/div&gt;
+&lt;div&gt;Entre tanto y tanto empezaron a desarmar los robots, había de todo niños que se les caían los tornillos, niños que los guardaban en el pantalón y luego estaban ellos. Aunque he de admitir que normalmente se pierden 8-10 tornillos en este caso de todos los robots se perdio 1 tornillo.&lt;/div&gt;
+&lt;p&gt;&lt;img data-attachment-id="2205" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1282/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=740" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"5.6","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519723835","copyright":"","focal_length":"30","iso":"100","shutter_speed":"0.016666666666667","title":"","orientation":"1"}' data-image-title="IMG_1282" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=740?w=740" class="alignnone size-full wp-image-2205" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=740" alt="IMG_1282" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1282.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;Me estoy centrando en cosas que me sorprendieron, la mayoría buenas pero no todo es bueno mas adelante vamos a verlo.&lt;/p&gt;
+&lt;p&gt;Al final pues la idea era primero memorizar o conocer el robot, desarmarlo y luego volver a armarlo. y que creen Si es posible armarlo sin ver nada. Yo no puedo hacerlo.&lt;/p&gt;
+&lt;p&gt;Hubieron algunas cosas como el hecho de que no conocían que el desarmado tenia dos cabezas una de cruz y la otra hexagonal así que perdieron bastante tiempo intentando atornillar con la cabeza equivocada.&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2206" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1286/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=740" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"4.5","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519724330","copyright":"","focal_length":"18","iso":"100","shutter_speed":"0.02","title":"","orientation":"1"}' data-image-title="IMG_1286" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=740?w=740" class="alignnone size-full wp-image-2206" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=740" alt="IMG_1286.JPG" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1286.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;Armados ya los robots pos vamoaprogramar&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2207" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1296/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=740" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"3.5","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519729986","copyright":"","focal_length":"18","iso":"1250","shutter_speed":"0.025","title":"","orientation":"1"}' data-image-title="IMG_1296" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=740?w=740" class="alignnone size-full wp-image-2207" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=740" alt="IMG_1296.JPG" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1296.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;y he aquí el mayor de los problemas de la inclusión de personas con discapacidad que si bien es cierto que estamos tan avanzados que ya podemos hablar con una cosa para decirle que compre papel de baño por amazon, no hemos podido crear un software lo suficientemente bueno para personas ciegas, aquí hay un gran problema y es que muy pocos estamos trabajando en ello, digo trabajando por Sonar.&lt;/p&gt;
+&lt;p&gt;Normalmente para programar a los Mbots se utiliza mblock que es un software basado en Scratch y S4A, bastante bueno e intuitivo, estos de makeblock le han metido bastante dinero a esto. mblock, no funciona con el text to speech de windows XP, baaaaaad. Entonces lo que hicimos fue abrir el bloc de notas y con el text to speech de la computadora pudimos esquivar algunas cosas, pero de nuevo mas problemas el código esta en ingles con funciones, programación pura que los niños jamas en la vida habían escuchado. Vomo pude y con ayuda de los profesores pudimos liarla y logramos programar el Mbot para utilizarlo como detector de obstáculos. Nuestras mentes de adultos siempre intentando meterles conocimiento mientras ellos lo único que quieren es jugar( quédense con esta frase).&lt;/p&gt;
+&lt;p&gt;Todo esta bien hasta que te empiezas a fijar bien en los detalles, como toda sociedad hay personas que no se incluyen aquí también, pues los niños con ceguera total se mantenían sentados y callados mientras los demás gritaban y jugaban en el piso con los robots.&lt;/p&gt;
+&lt;p&gt;Esta nena estuvo parada por 5 minutos esperando a que alguien le hablara.&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2208" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/20180227_120915/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180227_120915.jpg" data-orig-size="3024,4032" data-comments-opened="1" data-image-meta='{"aperture":"1.7","credit":"","camera":"SM-G955X","caption":"","created_timestamp":"1519733355","copyright":"","focal_length":"4.2","iso":"640","shutter_speed":"0.029411764705882","title":"","orientation":"1"}' data-image-title="20180227_120915" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180227_120915.jpg?w=225" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180227_120915.jpg?w=740" class="alignnone size-full wp-image-2208" src="https://themicrofcontrol.files.wordpress.com/2018/02/20180227_120915.jpg?w=4032" alt="20180227_120915.jpg" width="4032" height="3024"&gt;&lt;/p&gt;
+&lt;p&gt;Les enseñamos algunas cosas que imprimimos en 3D como una etiqueta braille que podían leer perfectamente.&lt;/p&gt;
+&lt;p&gt;Bueno ya terminado el curso era hora de los diplomas, yeei&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2209" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1309/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=740" data-orig-size="4940,2666" data-comments-opened="1" data-image-meta='{"aperture":"0","credit":"","camera":"","caption":"","created_timestamp":"0","copyright":"","focal_length":"0","iso":"0","shutter_speed":"0","title":"","orientation":"0"}' data-image-title="IMG_1309" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=740?w=740" class="alignnone size-full wp-image-2209" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=740" alt="img_1309.jpg" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1309-e1519797592710.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;Asi que gracias a SENACYT los niños pudieron tener un robot en sus manos.&lt;/p&gt;
+&lt;p&gt;Y los niños ya pudieron volver a ser niños y jugar con los robots el resto del día.&lt;/p&gt;
+
+&lt;a href="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1301/"&gt;&lt;img width="150" height="100" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg?w=150&amp;amp;h=100" class="attachment-thumbnail size-thumbnail" alt="" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg?w=150&amp;amp;h=100 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg?w=300 300w" sizes="(max-width: 150px) 100vw, 150px" data-attachment-id="2210" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1301/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"3.5","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519731872","copyright":"","focal_length":"18","iso":"640","shutter_speed":"0.033333333333333","title":"","orientation":"1"}' data-image-title="IMG_1301" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1301.jpg?w=740"&gt;&lt;/a&gt;
+&lt;a href="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1307/"&gt;&lt;img width="150" height="100" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg?w=150&amp;amp;h=100" class="attachment-thumbnail size-thumbnail" alt="" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg?w=150&amp;amp;h=100 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg?w=300 300w" sizes="(max-width: 150px) 100vw, 150px" data-attachment-id="2211" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1307/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg" data-orig-size="5184,3456" data-comments-opened="1" data-image-meta='{"aperture":"3.5","credit":"","camera":"Canon EOS REBEL T3i","caption":"","created_timestamp":"1519731992","copyright":"","focal_length":"21","iso":"1000","shutter_speed":"0.025","title":"","orientation":"1"}' data-image-title="IMG_1307" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1307.jpg?w=740"&gt;&lt;/a&gt;
+
+&lt;p&gt;Teniendo en cuenta que no se dispone de herramientas necesarias para que la inclusion de personas con discapacidad en muchos ámbitos aparte de las laborales, estamos hablando de cosas sociales, lúdicas y sobre todo de aprendizaje, cuando esas barreras se rompan o podamos saltarlas por cualquier medio estoy seguro que vamos a poder cambiar el mundo, es una necesidad del mundo. Yo por mi parte seguiré luchando intentando hacer el mundo un poco mas humano y mas accesible para todas las personas, con proyectos como estos con sonar, la matriz braille etc.&lt;/p&gt;
+&lt;p&gt;Realmente hay muchos proyectos que tienen el potencial de cambiar el mundo, luego están los proyectos que gracias a SENACYT buscan cambiar el mundo de los olvidados, de los despreciados dándoles herramientas para que dentro de algunos años puedan hacer algo con este conocimiento. El proximo taller es con niños con discapacidad auditiva, seguire informando que tal nos va.&lt;/p&gt;
+&lt;p&gt;Si ustedes me preguntan a dia de hoy y con esta experiencia si es posible cambiar el mundo yo puedo decir abiertamente SI juntos podemos lograrlo.&lt;/p&gt;
+&lt;p&gt;Asi que los dejo con esta  hermosa sonrisa para que puedan sentirse mejor.&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2212" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/28/cambiar-el-mundo-es-posible/img_1284/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=740" data-orig-size="5184,2053" data-comments-opened="1" data-image-meta='{"aperture":"0","credit":"","camera":"","caption":"","created_timestamp":"0","copyright":"","focal_length":"0","iso":"0","shutter_speed":"0","title":"","orientation":"0"}' data-image-title="IMG_1284" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=740?w=740" class="alignnone size-full wp-image-2212" src="https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=740" alt="img_1284.jpg" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=300 300w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=768 768w, https://themicrofcontrol.files.wordpress.com/2018/02/img_1284-e1519798978774.jpg?w=1024 1024w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;PD: al terminar de redactar esta publicación estaba lleno de lágrimas, malditas injusticias, los niños no tienen porque nacer asi. Pero estamos hablando de que cerca del 10% de la población guatemalteca tiene alguna discapacidad y la mayoría es discapacidad visual producida por falta de control pre y post natal, pero es que como quieren que las personas lleguen a comprar prenatales y pastillas a las farmacias caminando kilómetros si no tienen ni para comer, realmente esto es una cadena y me siento bien basura al pensar que no puedo realmente ayudar de una mejor manera, asi que lo mejor que puedo hacer es seguir compartiendo el conocimiento que tengo y tratar de nunca despreciar a nadie. Sé que es un placebo para que mi corazón no sufra, pero aun no se como ayudarlos.&lt;/p&gt;</description><category>antiguamakerspace</category><category>Electronica</category><category>Emprendimiento</category><category>experiencia</category><category>jaquerespeis</category><category>opinion</category><guid>http://jaquerespeis.org/posts/20180228cambiar-el-mundo-es-posible/</guid><pubDate>Wed, 28 Feb 2018 12:02:43 GMT</pubDate></item><item><title>Error programadora ESP8266-01: Solucion.</title><link>http://jaquerespeis.org/posts/20180224error-programadora-esp8266-01-solucion/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;p&gt;Houston tenemos un problema. La programadora barata que encontramos en ebay no funciona &lt;img src="https://s0.wp.com/wp-content/mu-plugins/wpcom-smileys/twemoji/2/72x72/1f626.png" alt="😦" class="wp-smiley" style="height: 1em; max-height: 1em;"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img data-attachment-id="2195" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_183857/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=740" data-orig-size="3024,4032" data-comments-opened="1" data-image-meta='{"aperture":"1.7","credit":"","camera":"SM-G955X","caption":"","created_timestamp":"1519411137","copyright":"","focal_length":"4.2","iso":"320","shutter_speed":"0.1","title":"","orientation":"1"}' data-image-title="20180223_183857" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=740?w=225" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=740?w=740" class="alignnone size-full wp-image-2195" src="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=740" alt="20180223_183857" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=113 113w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=225 225w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_183857.jpg?w=768 768w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;Holi, Bienvenidos de nuevo a the microfcontrol, ha sido un año bastante bueno en Guatemala con respecto a tecnología e internet de las cosas y especialmente para la comunidad que mañana 24 de febrero tendrá su primera reunion, Asi que nos vemos mañana en Teclab, edificio Tec, 4 grados norte, Junto con &lt;a href="https://www.facebook.com/giangoolabs/" target="_blank" rel="noopener"&gt;Giangoolabs&lt;/a&gt; Yeii.&lt;/p&gt;
+&lt;p&gt;Entrando en materia, hace un año aproximadamente que Oscar Leche (Fundador de la comunidad) me dijo, mira esta programadora para el ESP esta cool, yo ya llevaba cerca de un año de estar jugando con los ESP8266 (ay, como pasa el tiempo… Gracias al sensei kestler por haberme iniciado en el camino del IoT ), la cosa es que no pude hacer nada con ella, ya que no había ni nombre de la placa ni información, pero gracias a internet y un poco de research, logré dar con la solución.&lt;/p&gt;
+&lt;p&gt;Bueno antes vamos a poner un poco en contexto que es el ESP8266, bueno ya llevamos poco mas de dos años desde que empezamos a hablar sobre IoT en Guatemala con la comunidad y con los miembros, yendo y viniendo de departamento en departamento incentivando a jóvenes (algunos universitarios, otros como yo que no lo son) a que inventen y se unan a la ola de internet de las cosas. Pueden leer un poco mas en esta &lt;a href="https://themicrofcontrol.wordpress.com/2016/02/15/2016-ano-de-iot-en-guatemala/"&gt;publicación&lt;/a&gt;. Dos años después de verdad ha dado frutos, he recibido solicitudes de ayuda de 4-5 tesis, he visto proyectos de IoT materializarse y realmente es gratificante como esta cambiando el movimiento.&lt;/p&gt;
+&lt;p&gt;Bueno y toda esta casaca para que es, pues los primeros dispositivos de IoT que empezamos a usar fueron efectivamente los ESP8266, del cual pueden ver que casi todo lo que hay en este blog con WiFi esta hecho con ello, es uno de los favoritos a nivel mundial por la comunidad maker por el costo principalmente, pero tiene sus ventajas grandes.&lt;/p&gt;
+&lt;p&gt;De fabrica vienen para programarse o interactuar con LUA, que tambien tengo una&lt;a href="https://themicrofcontrol.wordpress.com/2015/11/16/nodemcu-101-guia-rapida-para-iot/"&gt; guia &lt;/a&gt;lo interesante es que los makers vieron su potencial asi que ahora ya podemos utilizar micropython o arduino para poder utilizarlo, haciendo un Flasheo a la memoria e insertando un binario nuevo con el código, en micropython solo se flashea una vez para que se pueda ejecutar el interprete y luego por comunicación serial o &lt;a href="https://themicrofcontrol.wordpress.com/2017/07/01/web-repl-comunicacion-con-micropython-por-medio-de-wifi/"&gt;por medio de wifi&lt;/a&gt; para poder reprogramarlo necesitamos que el pin0 cuando se enciende el ESP8266 reciba un pulso de GND, esto lo podemos hacer bastante bien con un jumper o un pedazo de alambre, lo mejor es usar un boton para ponerlo en modo &lt;em&gt;programming.&lt;/em&gt;&lt;/p&gt;
+&lt;h2&gt;El problema&lt;/h2&gt;
+&lt;p&gt;El problema con la programadora es que sirve unicamente para poder comunicarnos via serial a el esp8266, cuando queremos usarla para reprogramar no funciona porque no esta en modo programar.&lt;/p&gt;
+&lt;h2&gt;Solución&lt;/h2&gt;
+&lt;p&gt;Poner un jumper entre el pin 0 y GND, para así poder ponerlo en modo programar el problema con soldar directamente un cable entre gnd y pin0 es que cada vez que conectemos nuestro esp8266 va a entrar en modo programación y no sabremos si nuestro codigo funciona o no hasta que recarguemos el Binario.&lt;/p&gt;
+&lt;h3&gt;Solución de la solución&lt;/h3&gt;
+&lt;p&gt;&lt;img data-attachment-id="2197" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_212256/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=740" data-orig-size="3024,4032" data-comments-opened="1" data-image-meta='{"aperture":"1.7","credit":"","camera":"SM-G955X","caption":"","created_timestamp":"1519420976","copyright":"","focal_length":"4.2","iso":"200","shutter_speed":"0.033333333333333","title":"","orientation":"1"}' data-image-title="20180223_212256" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=740?w=225" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=740?w=740" class="alignnone size-full wp-image-2197" src="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=740" alt="20180223_212256" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=740 740w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=1480 1480w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=113 113w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=225 225w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_212256.jpg?w=768 768w" sizes="(max-width: 740px) 100vw, 740px"&gt;&lt;/p&gt;
+&lt;p&gt;Un botón, un pin conectado a GND y el otro a pin0 y se acabo el problema.&lt;/p&gt;
+&lt;p&gt;Quedaría algo así:&lt;/p&gt;
+
+&lt;a href="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_213722/"&gt;&lt;img width="113" height="150" src="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg?w=113&amp;amp;h=150" class="attachment-thumbnail size-thumbnail" alt="" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg?w=113&amp;amp;h=150 113w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg?w=226 226w" sizes="(max-width: 113px) 100vw, 113px" data-attachment-id="2198" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_213722/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg" data-orig-size="3024,4032" data-comments-opened="1" data-image-meta='{"aperture":"1.7","credit":"","camera":"SM-G955X","caption":"","created_timestamp":"1519421841","copyright":"","focal_length":"4.2","iso":"200","shutter_speed":"0.071428571428571","title":"","orientation":"1"}' data-image-title="20180223_213722" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg?w=225" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213722.jpg?w=740"&gt;&lt;/a&gt;
+&lt;a href="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_213735/"&gt;&lt;img width="113" height="150" src="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg?w=113&amp;amp;h=150" class="attachment-thumbnail size-thumbnail" alt="" srcset="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg?w=113&amp;amp;h=150 113w, https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg?w=226 226w" sizes="(max-width: 113px) 100vw, 113px" data-attachment-id="2199" data-permalink="https://themicrofcontrol.wordpress.com/2018/02/24/error-programadora-esp8266-01-solucion/20180223_213735/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg" data-orig-size="3024,4032" data-comments-opened="1" data-image-meta='{"aperture":"1.7","credit":"","camera":"SM-G955X","caption":"","created_timestamp":"1519421855","copyright":"","focal_length":"4.2","iso":"200","shutter_speed":"0.076923076923077","title":"","orientation":"1"}' data-image-title="20180223_213735" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg?w=225" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/02/20180223_213735.jpg?w=740"&gt;&lt;/a&gt;
+
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.instagram.com/p/BfkIAHsjF0s/?taken-by=yeffrimic" title="Ver en Instagram" target="_blank"&gt;&lt;img src="http://instagr.am/p/BfkIAHsjF0s/media/?size=l" alt="Instagram Photo"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;y pues bueno realmente no es la gran solución, pero es La solución así que cualquier cosa por favor háganla saber.&lt;/p&gt;
+&lt;p&gt;Nos vemos en la siguiente publicación.&lt;/p&gt;
+&lt;p&gt;Y recuerden solo necesitan una excusa para cambiar el mundo &lt;img src="https://s0.wp.com/wp-content/mu-plugins/wpcom-smileys/twemoji/2/72x72/2764.png" alt="❤" class="wp-smiley" style="height: 1em; max-height: 1em;"&gt;&lt;/p&gt;
+&lt;p&gt;PD: se me olvido mencionar que este modelo de ESP8266 es el mas barato de todos asi que es mejor que compren una sola quemadora y luego tengan una placa especificamente hecha para poder usarlo despues, les va a salir mas barato que un nodemcu y aprovechan mejor el hardware.&lt;/p&gt;
+&lt;p&gt; &lt;/p&gt;</description><category>Emprendimiento</category><category>Guatemala</category><category>Hardware</category><category>internet de las cosas</category><category>Internet of Things</category><category>jaquerespeis</category><category>Node-red</category><category>NodeMCU</category><category>open-source</category><guid>http://jaquerespeis.org/posts/20180224error-programadora-esp8266-01-solucion/</guid><pubDate>Sat, 24 Feb 2018 09:02:59 GMT</pubDate></item><item><title>Quipus incas y cifrado con factorización de números primos</title><link>http://jaquerespeis.org/posts/esblogfactorizacion-primos-incas/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Quipu#/media/File:Nueva_cor%C3%B3nica_y_buen_gobierno_(1936_facsimile)_p360.png"&gt;&lt;img alt="Dibujo de un inca y su quipu" src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Nueva_cor%C3%B3nica_y_buen_gobierno_%281936_facsimile%29_p360.png"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Según este sabio [Nordenskiöld], los indios colocaban en las tumbas
+únicamente quipus con números que a sus ojos tenían valor mágico,
+expresándolos no en forma directa sino mediante otros que los incluyen o que
+son sus múltiplos y tratando de hacerlos coincidir con la numeración
+resultante de cálculos obtenidos de la consulta de los astros. [...].
+La finalidad que llevó a los indios a tal práctica fue entretener, mediante
+estos complicados «rebus», a los espíritus malignos, quienes se esforzarían
+para desanudar las cuerdas y encontrar esta numeración mágica [...].&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;en Estudio sobre los quipus, de Carlos Radicati di Primeglio.&lt;/p&gt;
+&lt;p&gt;Y así fue como lxs incas inventaron el cifrado con factorización de números
+primos, la base de todas las comunicaciones seguras y criptomonedas de hoy. :D&lt;/p&gt;&lt;/div&gt;</description><category>free software</category><category>readings</category><guid>http://jaquerespeis.org/posts/esblogfactorizacion-primos-incas/</guid><pubDate>Tue, 09 Jan 2018 22:01:35 GMT</pubDate></item><item><title>Domotica con Telegram: Como utilizar un chatbot para controlar cosas conectadas a internet</title><link>http://jaquerespeis.org/posts/20180105domotica-con-telegram-como-utilizar-un-chatbot-para-controlar-cosas-conectadas-a-internet/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;p&gt;Holi, lo sé no es el mejor titulo del mundo, pero mi &lt;a href="http://www.undergroundpage.com/2018/01/raspberry-pi-kali-linux-smartphone.html" target="_blank" rel="noopener"&gt;compañero&lt;/a&gt; (me robo la idea ). Pero bueno a dejar de llorar y empezar a crear,&lt;/p&gt;
+&lt;p&gt;El dia de hoy vamos a crear un chatbot para poder controlar nuestras cosas conectadas a internet por medio de MQTT y python. WUJU&lt;/p&gt;
+&lt;p&gt;Lo que necesitamos:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Telegram app&lt;br&gt;
+&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Python3&lt;br&gt;
+&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Mosquitto&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Arduino IDE&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ESP8266&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ledes&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DHT11&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Vamos a empezar por lo que ya conocemos y es la parte electronica, hay una serie de complicaciones con respecto a nuestro querido ESP8266, es que no es tolerante a 5v, por lo que tendremos que tener bastante cuidado a la hora de meterle sensores analogicos o señales de 5v, podemos utilizar un divisor de voltaje o un nivelador de voltaje.&lt;/p&gt;
+&lt;p&gt;ARDUINO IDE&lt;/p&gt;
+&lt;p&gt;Necesitamos Algunas librerias, a estas alturas del partido no creo que sea necesario que tener que explicar como instalar las librerias, pero si eres nuevo en mi blog te recomiendo que leas la serie de IOT de mi blog y estés en lo ultimo a nivel mundial como nosotros.( ja, ja, ja( asi se escribe la risa xD))&lt;/p&gt;
+&lt;p&gt;La logica del codigo es la siguiente, por medio de WIFI, nos conectamos a un broker ( en este caso local) pero puede ser en la nube aunque uno local funciona muy bien, se suscribe a los topicos para controlar las salidas en este caso /salida1, hasta la /salida4 recibiendo un CHAR o Caracter 0 o 1 para apagar y encender respectivamente. luego veran que la luz de su esp8266 azul se queda parpadeando, eso quiere decir que funciona correctamente el codigo, cada 5 segundos envia el estado del sensore humedad y temperatura respectivamente.&lt;/p&gt;
+&lt;pre&gt;Codigo:
+
+/*
+ Este sketch es para controlar 4 salidas digitales distintas
+ tambien tiene un dht11 para enviar la temperatura y un bluetooth para conectarse de manera local.
+
+Circuito:
+ NodeMCU v1.0
+ DHT11
+ Modulo Blutooth hc-06 o hc-05
+ 4 modulos de relay o relays
+ led amarillo, rojo.
+ resistencia 10k para el dht11
+
+
+
+
+Yeffri J. Salazar
+ Hackerspace Xibalba y Comunidad Arduino Guatemala
+ Themicrofcontrol.wordpress.com
+
+*/
+/************************************
+ ** Librerias **
+ ***********************************/
+#include 
+#include 
+#include "DHT.h"
+/************************************
+ ** constantes **
+ ***********************************/
+#define salida1 D5
+#define salida2 D6
+#define salida3 D7
+#define salida4 D8
+#define ledAmarillo D4
+#define ledRojo D1
+#define pinDHT 9
+#define puertoMqtt 1883
+/***********************************
+ ** objetos y variables **
+ ***********************************/
+DHT dht;
+WiFiClient clienteWifi;//este cliente se encarga de la comunicacion con el wifi
+PubSubClient clienteMQTT(clienteWifi);//este utiliza el cliente anterior para hacer poder crear la conexion mqtt
+//si pasan por el hackerspace Xibalba pues ya tienen la clave
+const char * ssid = "Hackerspace";
+const char * claveWifi = "IOT12345";
+const char * brokerMqtt = "192.168.1.10";// ip del broker sin http ni nada solo los numeros
+uint32_t ultimoIntentoReconexion;
+uint32_t timerEnvioDatos;
+uint32_t cambioEstado = 0;
+uint8_t estadoLed = 0;
+uint16_t tiempoParpadeo = 350;
+float humedad, temperatura;
+
+
+
+
+void parpadeo(uint8_t led) {
+ //Serial.println(millis() - cambioEstado);
+ if ( millis() - cambioEstado &amp;gt; tiempoParpadeo) {
+ // Serial.println(pasoSemaforo);
+ cambioEstado = millis();
+ estadoLed = !estadoLed;
+ }
+ digitalWrite(led, estadoLed);
+}
+
+
+
+
+void conectarAlWifi() {
+
+WiFi.begin(ssid, claveWifi);
+ Serial.print("conectando a");
+ Serial.println(ssid);
+ while (WiFi.status() != WL_CONNECTED) {
+ delay(500);
+ Serial.print(".");
+ }
+
+Serial.println("");
+ Serial.println("Wifi Conectado ");
+ Serial.println("direccion IP: ");
+ Serial.println(WiFi.localIP());
+}
+
+void callback(char* topic, byte* mensaje, unsigned int length) {
+ String topico = topic;
+ Serial.print("Mensaje Recibido del topico: ");
+ Serial.println(topico);
+ Serial.print("mensaje : ");
+ for (uint8_t i = 0; i &amp;lt; length; i++) {  Serial.print(mensaje[i]);  }  //le restamos -48 para que el valor sea 0 o 1  //restamos el valor ascii para hacerlo un entero if (topico == "/salida1") {  digitalWrite(salida1, mensaje[0] - 48);  Serial.println("Salida 1 ");  }  else if (topico == "/salida2") {  digitalWrite(salida2, mensaje[0] - 48);  Serial.println("Salida 2 ");  }  else if (topico == "/salida3") {  digitalWrite(salida3, mensaje[0] - 48);  Serial.println("Salida 3 ");  }  else if (topico == "/salida4") {  digitalWrite(salida4, mensaje[0] - 48);  Serial.println("Salida 4 ");  }  else if (topico == "/temperatura") {  Serial.println(temperatura);  char msg[3];  snprintf (msg, 3, "%ld", (int)temperatura);  clienteMQTT.publish("/respuestaTemperatura", msg);  }  else if (topico == "/humedad") {  Serial.println(humedad);  char msg[3];  snprintf (msg, 3, "%ld", (int)temperatura);  clienteMQTT.publish("/respuestaTemperatura", msg);  }  else {  Serial.println("error de mensaje");  } } boolean reconexion() {  Serial.print("Conectando al broker mqtt");  //intentando conectar al broker  if (clienteMQTT.connect("ESP8266Client")) {  Serial.println("Conectado");  //publicamos que estamos conectados  clienteMQTT.publish("/conexion", "Conectado");  //nos suscribimos a los topicos para controlar los ledes  clienteMQTT.subscribe("/salida1");  clienteMQTT.subscribe("/salida2");  clienteMQTT.subscribe("/salida3");  clienteMQTT.subscribe("/salida4");  clienteMQTT.subscribe("/temperatura");  clienteMQTT.subscribe("/humedad");  } else {  Serial.print("falló, rc=");  Serial.print(clienteMQTT.state());  }  return clienteMQTT.connected(); } void entradaSerial() {  if (Serial.available()) {  char dato = Serial.read();  if (dato == 'a') {  digitalWrite(salida1, HIGH);  Serial.println("Salida 1 ");  }  else if (dato == 's') {  digitalWrite(salida2, HIGH);  Serial.println("Salida 2 ");  }  else if (dato == 'd') {  digitalWrite(salida3, HIGH);  Serial.println("Salida 3 ");  }  else if (dato == 'f') {  digitalWrite(salida4, HIGH);  Serial.println("Salida 4 ");  }  else if (dato == 'q') {  digitalWrite(salida1, LOW);  Serial.println("Salida 1 ");  }  else if (dato == 'w') {  digitalWrite(salida2, LOW);  Serial.println("Salida 2 ");  }  else if (dato == 'e') {  digitalWrite(salida3, LOW);  Serial.println("Salida 3 ");  }  else if (dato == 'r') {  digitalWrite(salida4, LOW);  Serial.println("Salida 4 ");  }  else if (dato == ' ') {  digitalWrite(salida4, LOW);  digitalWrite(salida3, LOW);  digitalWrite(salida2, LOW);  digitalWrite(salida1, LOW);  Serial.println("apagando todo");  }  else if (dato == '1') {  digitalWrite(salida4, HIGH);  digitalWrite(salida3, HIGH);  digitalWrite(salida2, HIGH);  digitalWrite(salida1, HIGH);  Serial.println("encendiendo todo");  } else {  Serial.println("error de mensaje");  }  } } void setup() {  Serial.begin(9600);  Serial.println("iniciando programa Holi mami");  dht.setup(pinDHT); // dht PIN  pinMode(salida1, OUTPUT);  pinMode(salida2, OUTPUT);  pinMode(salida3, OUTPUT);  pinMode(salida4, OUTPUT);  pinMode(ledAmarillo, OUTPUT);  pinMode(ledRojo, OUTPUT);  digitalWrite(ledAmarillo, HIGH);  digitalWrite(ledRojo, HIGH);  conectarAlWifi();  clienteMQTT.setServer(brokerMqtt, puertoMqtt); //le decimos cual es el servidor y el puerto al que se debe conectar  clienteMQTT.setCallback(callback);//le decimos como se llama la funcion de callback } void loop() {  entradaSerial();  if (!clienteMQTT.connected()) {  if (millis() - ultimoIntentoReconexion &amp;gt; 5000) {
+ ultimoIntentoReconexion = millis();
+ // Attempt to reconnect
+ if (reconexion()) {
+ ultimoIntentoReconexion = 0;
+ }
+ }
+ } else {
+ //cliente conectado
+ if (millis() - timerEnvioDatos &amp;gt; 5000) {
+ timerEnvioDatos = millis();
+ //a falta de sensores enviamos valores aleatorios
+ char msg[3];
+ humedad = dht.getHumidity();
+ temperatura = dht.getTemperature();
+ snprintf (msg, 3, "%ld", (int)temperatura);
+ clienteMQTT.publish("/temperatura", msg);
+ snprintf (msg, 3, "%ld", (int)humedad);
+ clienteMQTT.publish("/humedad", msg);
+ Serial.print(dht.getStatusString());
+ Serial.print("\t");
+ Serial.print(humedad);
+ Serial.print("\t\t");
+ Serial.print(temperatura);
+ }
+ clienteMQTT.loop();
+ parpadeo(D1);
+ parpadeo(D4);
+ }
+}&lt;/pre&gt;
+&lt;p&gt;He tratado la manera de hacer el codigo lo mejor legible posible asi que si no le entienden no duden en comentar abajo &lt;img src="https://s0.wp.com/wp-content/mu-plugins/wpcom-smileys/twemoji/2/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;"&gt;&lt;/p&gt;
+&lt;p&gt;Esto al final es algo que ya hemos visto anteriormente solo un poco tuneado, para que funcione para nuestros propositos la verdadera magia al final de todo esto la hará python ( ay python :3 ), eso quiere decir que necesitamos una computadora o un servidor para que corra nuestro script.&lt;/p&gt;
+&lt;h2&gt;CHATBOT&lt;/h2&gt;
+&lt;p&gt;Antes de empezar a programar y configurar nuestro servidor o maquina local, vamos a crear de manera super sencilla nuestro bot en telegram. Para quien no sepa que es telegram, pues es una aplicacion de mensajeria instantanea que funciona en web, escritorio y movil. yo suelo utilizarla mucho por su versatilidad y que aparte es open source gracias a ello tiene demasiadas features muy buenas que poco a poco la competencia como whatsapp ha ido implementando(copiando).&lt;/p&gt;
+&lt;p&gt;El papa de todos los bots.&lt;/p&gt;
+&lt;p&gt;Lo primero que debemos hacer es hablar con el padre de todos los bots el @BotFather, es super sencillo crear nuestro bot, al final nos dara un TOKEN  el cual usaremos para poder acceder a los servicios de la API de telegram. Este token es super secreto asi que tengan cuidado donde lo almacenan, por favor usen keypassxc (promocion gracias a que me ha ayudado mucho a guardar las 123873102937 contraseñas que utilizo ).&lt;/p&gt;
+&lt;p&gt;Asi que vamos a lo nuestro. Con esta serie de capturas de pantalla  veremos lo facil que es configurar el bot.  Pero si no quieres ver estos son los comandos&lt;/p&gt;
+&lt;p&gt;En el chat con BotFather,&lt;/p&gt;
+&lt;pre&gt;/start
+/newbot
+Nombre del bot
+usuario del bot&lt;/pre&gt;
+&lt;a href="https://themicrofcontrol.wordpress.com/2018/01/05/domotica-con-telegram-como-utilizar-un-chatbot-para-controlar-cosas-conectadas-a-internet/#gallery-2183-1-slideshow"&gt;Haga click para ver el pase de diapositivas.&lt;/a&gt;
+&lt;h2&gt;&lt;strong&gt;Servidor o maquina local&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Como mencionaba en el parrafo anterior lo que necesitamos es una computadora para correr nuestro script de python3, pero bien puede ser una rpi como cerebro de nuestra casa.&lt;/p&gt;
+&lt;p&gt;Mosquitto&lt;/p&gt;
+&lt;pre&gt;Sudo apt-get install mosquitto
+sudo apt-get install mosquitto-clients&lt;/pre&gt;
+&lt;h3&gt;Python&lt;/h3&gt;
+&lt;p&gt;La ultima vez que pregunte si era mejor usar python 2 o python 3 me regañaron demasiado fuerte asi que de ahora en adelante todo sera python 3&lt;br&gt;
+Utilizaremos esta muy bonita y facil de implementar libreria, tambien una libreria que nos ayudara en la comunicacion con el broker MQTT&lt;/p&gt;
+&lt;pre&gt;https://github.com/eternnoir/pyTelegramBotAPI #telegram api 
+https://www.eclipse.org/paho/clients/python/&lt;/pre&gt;
+&lt;p&gt;Asi que la mejor manera de instalarla es como dice en el repositorio:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;pip3 install pyTelegramBotAPI&lt;/code&gt; pip3 install paho-mqtt&lt;/pre&gt;
+&lt;p&gt;Vamos entonces a probar un poco de codigo seguirmos las instrucciones del repositorio, pero traducido para mejor entendimiento. Cualquier duda consultar en el repositorio o escribir en los comentarios jovenes &lt;img src="https://s0.wp.com/wp-content/mu-plugins/wpcom-smileys/twemoji/2/72x72/1f600.png" alt="😀" class="wp-smiley" style="height: 1em; max-height: 1em;"&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;span class="pl-k"&gt;import&lt;/span&gt; telebot
+
+bot &lt;span class="pl-k"&gt;=&lt;/span&gt; telebot.TeleBot(&lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;TOKEN&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;) #la cadena que nos dio nuestro botfather
+
+&lt;span class="pl-en"&gt;@bot.message_handler&lt;/span&gt;(&lt;span class="pl-v"&gt;commands&lt;/span&gt;&lt;span class="pl-k"&gt;=&lt;/span&gt;[&lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;'&lt;/span&gt;start&lt;span class="pl-pds"&gt;'&lt;/span&gt;&lt;/span&gt;, &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;'&lt;/span&gt;help&lt;span class="pl-pds"&gt;'&lt;/span&gt;&lt;/span&gt;])
+&lt;span class="pl-k"&gt;def&lt;/span&gt; &lt;span class="pl-en"&gt;bienvenida&lt;/span&gt;(&lt;span class="pl-smi"&gt;message&lt;/span&gt;):
+	bot.reply_to(message, &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;Holi, bienvenido a themicrofcontrol&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;)
+
+&lt;span class="pl-en"&gt;@bot.message_handler&lt;/span&gt;(&lt;span class="pl-v"&gt;func&lt;/span&gt;&lt;span class="pl-k"&gt;=&lt;/span&gt;&lt;span class="pl-k"&gt;lambda&lt;/span&gt; &lt;span class="pl-smi"&gt;message&lt;/span&gt;: &lt;span class="pl-c1"&gt;True&lt;/span&gt;)
+&lt;span class="pl-k"&gt;def&lt;/span&gt; repetirTodo(&lt;span class="pl-smi"&gt;message&lt;/span&gt;):
+	bot.reply_to(message, message.text)
+
+bot.polling(timeout=30)&lt;/pre&gt;
+&lt;p&gt;Algo que deben de saber es que las funciones handler se ejecutan en el orden en el que fueron declaradas asi que cuidado.&lt;/p&gt;
+&lt;p&gt;Ahora vamos a hacer un pequeño script que publica por medio de mqtt al broker que deseamos.&lt;/p&gt;
+&lt;p&gt;Primero ejecutamos el siguiente comando en la terminal para habilitar nuestro broker local&lt;/p&gt;
+&lt;pre&gt;mosquitto -d&lt;/pre&gt;
+&lt;p&gt;ahora ya podemos probar nuestro codigo en python3&lt;/p&gt;
+&lt;pre&gt;import paho.mqtt.publish as publish
+from time import sleep
+while True:
+    publish.single('/TopicoPrueba','holi',hostname='localhost')
+    sleep(1)&lt;/pre&gt;
+&lt;p&gt;Para verificar si estamos enviando correctamente los datos utilizaremos mosquitto_sub&lt;/p&gt;
+&lt;pre&gt;mosquitto_sub -h localhost -t /TopicoPrueba&lt;/pre&gt;
+&lt;p&gt;&lt;img data-attachment-id="2191" data-permalink="https://themicrofcontrol.wordpress.com/2018/01/05/domotica-con-telegram-como-utilizar-un-chatbot-para-controlar-cosas-conectadas-a-internet/deepinscreenshot_select-area_20180104171051/" data-orig-file="https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=740" data-orig-size="735,90" data-comments-opened="1" data-image-meta='{"aperture":"0","credit":"","camera":"","caption":"","created_timestamp":"0","copyright":"","focal_length":"0","iso":"0","shutter_speed":"0","title":"","orientation":"0"}' data-image-title="DeepinScreenshot_select-area_20180104171051" data-image-description="" data-medium-file="https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=740?w=300" data-large-file="https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=740?w=735" class="alignnone size-full wp-image-2191" src="https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=740" alt="DeepinScreenshot_select-area_20180104171051" srcset="https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png 735w, https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=150 150w, https://themicrofcontrol.files.wordpress.com/2018/01/deepinscreenshot_select-area_20180104171051.png?w=300 300w" sizes="(max-width: 735px) 100vw, 735px"&gt;&lt;/p&gt;
+&lt;p&gt;Una vez hecho esto cada segundo estaremos recibiendo informacion en este caso Holi.&lt;/p&gt;
+&lt;p&gt;Si bien es cierto que no soy un experto programador quise hacer este codigo lo mejor legible posible, se puede mejorar mucho, como todo en la vida.&lt;/p&gt;
+&lt;p&gt;La idea es la siguiente&lt;br&gt;
+Hablamos con nuestro chatbot corriendo este script en python para que pueda ejecutar las ordenes que le damos. El comando /start inicia la conversacion y nos dice los comandos (aun debo trabajar en la parte de la interfaz pero poco a poco), las ordenes son sencillas y descriptivas EncenderSalida1 enciende la salida 1 ja, ja, ApagarSalida1 la apaga y es lo mismo con las 4 salidas o las que queramos poner solo agregamos mas elif en la funcion.&lt;/p&gt;
+&lt;p&gt;Bueno sin mas les dejo el codigo y el &lt;a href="https://github.com/yeffrimic/DomoticaConTelegramYArduino/blob/master/chatbot.py"&gt;repositorio&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Por alguna extraña razon,  no me aparece el codigo indentado, pero de igual manera se los dejo, por favor copienlo del repositorio.&lt;/p&gt;
+&lt;pre&gt; import paho.mqtt.publish as publish
+ import telebot
+ bot = telebot.TeleBot(token)
+ @bot.message_handler(commands=['start', 'help'])
+ def send_welcome(message):
+ bot.reply_to(message, "Holi, bienvenido al chatbot mas kulz &amp;lt;3")
+ bot.reply_to(message, "Comandos: \n EncenderSalida1, EncenderSalida2, EncenderSalida3, EncenderSalida4, EncenderSalida4, EncenderTodo.\n ApagarSalida1, ApagarSalida2, ApagarSalida3, ApagarSalida4, ApagarTodo\n Gracias")
+ @bot.message_handler(func=lambda message: True)
+ def echo_all(message):
+ bot.reply_to(message, message.text)
+ if(message.text == 'EncenderSalida1'):
+ publish.single('/salida1','1',hostname='localhost')
+ print("Salida 1 encendida.")
+ bot.reply_to(message, "Salida 1 encendida.")
+ elif(message.text == 'ApagarSalida1'):
+ publish.single('/salida1','0',hostname='localhost')
+ print("Salida 1 apagada")
+ bot.reply_to(message, "Salida 1 apagada.")
+ elif(message.text == 'EncenderSalida2'):
+ publish.single('/salida2','1',hostname='localhost')
+ print("Salida 2 encendida.")
+ bot.reply_to(message, "Salida 2 encendida.")
+ elif(message.text == 'ApagarSalida2'):
+ publish.single('/salida2','0',hostname='localhost')
+ print("Salida 2 apagada.")
+ bot.reply_to(message, "Salida 2 apagada.")
+ elif(message.text == 'EncenderSalida3'):
+ publish.single('/salida3','1',hostname='localhost')
+ print("Salida 3 encendida.")
+ bot.reply_to(message, "Salida 3 encendida.")
+ elif(message.text == 'ApagarSalida3'):
+ publish.single('/salida3','0',hostname='localhost')
+ print("Salida 3 apagada.") 
+ bot.reply_to(message, "Salida 3 apagada.")
+ elif(message.text == 'EncenderSalida4'):
+ publish.single('/salida4','1',hostname='localhost')
+ print("Salida 4 encendida.")
+ bot.reply_to(message, "Salida 4 encendida.")
+ elif(message.text == 'ApagarSalida4'):
+ publish.single('/salida4','0',hostname='localhost')
+ print("Salida 4 apagada.") 
+ bot.reply_to(message, "Salida 4 apagada."
+ elif(message.text == 'ApagarTodo'):
+ publish.single('/salida4','0',hostname='localhost')
+ publish.single('/salida1','0',hostname='localhost')
+ publish.single('/salida2','0',hostname='localhost')
+ publish.single('/salida3','0',hostname='localhost')
+ bot.reply_to(message, "Todo encendido.")
+ print("apagando todo.") 
+ elif(message.text == 'EncenderTodo'):
+ publish.single('/salida4','1',hostname='localhost')
+ publish.single('/salida1','1',hostname='localhost')
+ publish.single('/salida2','1',hostname='localhost')
+ publish.single('/salida3','1',hostname='localhost')
+ print("apagando todo.") 
+ bot.reply_to(message, "Todo apagado")
+ #print(message)
+ print(message.text)
+ print("iniciando programa")
+ bot.polling(none_stop=False,timeout=30)&lt;/pre&gt;
+&lt;p&gt; &lt;/p&gt;
+&lt;div class="jetpack-video-wrapper"&gt;&lt;iframe class="youtube-player" type="text/html" width="740" height="447" src="https://www.youtube.com/embed/5i6b5EFAOhA?version=3&amp;amp;rel=1&amp;amp;fs=1&amp;amp;autohide=2&amp;amp;showsearch=0&amp;amp;showinfo=1&amp;amp;iv_load_policy=1&amp;amp;wmode=transparent" allowfullscreen="true" style="border:0;"&gt;&lt;/iframe&gt;&lt;/div&gt;
+&lt;p&gt;Bueno y con eso concluye el tutorial del dia de hoy no olviden comentar y compartir.&lt;/p&gt;
+&lt;p&gt;y recuerden, Solo necesitan una excusa para cambiar el mundo.&lt;/p&gt;</description><category>Arduino</category><category>Guatemala</category><category>Hardware</category><category>ideas</category><category>internet de las cosas</category><category>Internet of Things</category><category>jaquerespeis</category><category>Node-red</category><category>NodeMCU</category><category>open-source</category><category>Raspberry Pi</category><guid>http://jaquerespeis.org/posts/20180105domotica-con-telegram-como-utilizar-un-chatbot-para-controlar-cosas-conectadas-a-internet/</guid><pubDate>Fri, 05 Jan 2018 08:01:50 GMT</pubDate></item><item><title>San José participará en #CompletetheMap, para mejorar el mapa de la ciudad entre todes</title><link>http://jaquerespeis.org/posts/esblogcompletethemap/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;&lt;p&gt;&lt;a href="https://www.mapillary.com/"&gt;Mapillary&lt;/a&gt; por primera vez ha lanzado un reto
+global de captura de imágenes. Desde el 11 de diciembre hasta el 31 de enero,
+San José estará participando en
+&lt;a href="https://blog.mapillary.com/community/2017/06/29/completethemap-challenges.html"&gt;#CompletetheMap&lt;/a&gt;
+para completar su mapa capturando fotos con las herramientas de Mapillary,
+junto a ciudades, pueblos y lugares remotos de todo el mundo.&lt;/p&gt;
+&lt;p&gt;Mapillary es una plataforma colaborativa que permite visualizar el mundo con
+fotos a nivel de la calle. Las fotos son contribuidas por una amplia gama de
+fuentes, incluyendo personas, gobiernos, agencias humanitarias y empresas de
+mapas. Las fotos luego son procesadas por Mapillary para extraer datos
+geográficos como límites de velocidad, giros prohibidos, ciclovías y la
+cantidad de vegetación en un lugar. Por estas razones, se ha convertido en una
+herramienta popular en la comunidad de OpenStreetMap, un proyecto de código
+abierto que se basa en personas editoras voluntarias para crear el mapa del
+mundo.&lt;/p&gt;
+&lt;iframe width="640" height="480" src="https://embed-v1.mapillary.com/embed?version=1&amp;amp;filter=%5B%22all%22%5D&amp;amp;map_filter=%5B%22all%22%5D&amp;amp;map_style=mapbox_streets&amp;amp;image_key=mlDTpI2tIa5fP_My7riHcw&amp;amp;x=0.49787228454942833&amp;amp;y=0.4727477024147648&amp;amp;client_id=WHJxWW40RWhyVGR6ajVEci1saHZNUTozZDQ5NjRmM2I4ZjBiNjc2&amp;amp;style=photo" frameborder="0"&gt;&lt;/iframe&gt;
+
+&lt;p&gt;Algunos usos prácticos de estos datos incluyen el análisis de la infraestructura
+para bicicletas a lo largo de una ciudad, reducción de riesgos antes y después de
+desastres, movilidad urbana, y puntos de reunión. #CompletetheMap viene a impulsar
+este estilo rápido de recolección de datos en un área específica. La idea
+de #CompletetheMap es simple. El área seleccionada se divide en zonas, y personas
+miembros de la comunidad local colaboran para capturar imágenes en cada zona.
+Conforme el porcentaje de fotos de calles y caminos aumenta, la zona cambia de
+color de rojo a naranja, y de naranja a verde.&lt;/p&gt;
+&lt;p&gt;El reto #CompletetheMap empezó en mayo de este año y ya se ha realizado en ciudades
+como
+&lt;a href="https://mapillary.github.io/mapillary_greenhouse/ctm/brasilia/"&gt;Brasilia&lt;/a&gt;,
+&lt;a href="https://mapillary.github.io/mapillary_greenhouse/challenge/moscow/"&gt;Moscú&lt;/a&gt;,
+&lt;a href="https://mapillary.github.io/mapillary_greenhouse/challenge/berlin/"&gt;Berlín&lt;/a&gt; y
+&lt;a href="https://mapillary.github.io/mapillary_greenhouse/challenge/ottawa/"&gt;Ottawa&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Cada una de estas ciudades ha respondido en su propia forma, reuniendo a la
+comunidad y mostrando la gran cantidad de datos que incluso un pequeño grupo de
+personas puede recolectar. Brasilia se ha concentrado en características de
+calles y puntos de interés. Moscú se reunió para capturar fotos de algunas de
+las carreteras más nuevas alrededor del centro de la ciudad. Berlín, la primera
+en participar en el reto de #CompletetheMap, ayudó a prepararlo recolectando
+muchas de las calles más pequeñas y rutas peatonales. Luego está Ottawa,
+un #CompletetheMap centrado en infraestructura para bicicletas. En este reto,
+20 personas lograron recolectar medio millón de imágenes y casi 2000 km de
+cobertura nueva.&lt;/p&gt;
+&lt;p&gt;El reto global le permite a cualquier persona seguir su progreso relativo a
+otras alrededor del mundo, recolectando fotos en un área de 50 km2. Las
+participantes pueden ganar aumentando los km de nuevas rutas que capturan, la
+cantidad de imágenes que toman, y el número de participantes que se unen para
+ayudarles.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://ia801202.us.archive.org/4/items/jaquerespeis-mapas/complethemap/complethemap.png"&gt;&lt;img alt="CompletetheMap" src="https://ia801202.us.archive.org/4/items/jaquerespeis-mapas/complethemap/complethemap.png"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Actualmente, 23 ciudades de 17 países se han registrado para el #CompletetheMap
+global.&lt;/p&gt;
+&lt;p&gt;Todo lo que se necesita para colaborar es un teléfono celular. Participe en el
+reto descargando la aplicación de Mapillary y tomando fotos de las calles por
+las que viaja. Una vez que se conecte a una red wifi, suba las imágenes y
+véalas aparecer en Mapillary.com.&lt;/p&gt;
+&lt;p&gt;Puede unirse a la comunidad de maperos y maperas de Costa Rica en
+&lt;a href="https://www.facebook.com/maperespeis/"&gt;https://www.facebook.com/maperespeis/&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><guid>http://jaquerespeis.org/posts/esblogcompletethemap/</guid><pubDate>Mon, 11 Dec 2017 08:12:35 GMT</pubDate></item><item><title>Cómo instalar Firma Digital de Costa Rica en GNU/Linux Fedora 27</title><link>http://jaquerespeis.org/posts/instalar-firma-digital-costa-rica-linux-fedora/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;p&gt;Esta guía documenta cómo instalar el controlador de la tarjeta de Firma Digital de Costa Rica y la jerarquía de certificados del Banco Central (SINPE) y del MICITT en el sistema operativo Fedora de arquitectura Intel de 64 bits (x86_64).&lt;/p&gt;
+&lt;p&gt;El motivo de esta nueva guía de instalación tenía los siguientes propósitos:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Configurar de la forma más sencilla y adecuada el sistema para que funcione con la mayor cantidad de programas.&lt;/li&gt;
+&lt;li&gt;Lograr que funcione para todos los usuarios del sistema, incluyendo los nuevos usuarios creados tras las instalación.&lt;/li&gt;
+&lt;li&gt;Funcionar con servicios obsoletos como el de la CCSS (con applet Java) en el navegador Icecat.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Instalación de las dependencias&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Instalar el soporte CCID de PC/SC para que reconozca el lector de tarjetas y el plugin NPAPI IcedTea-Web para poder cargar el applet Java que permite firmar desde el navegador Icecat (Firefox ya no soporta applets Java) y OpenJFX si pretende instalarse el firmador del Banco Central:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# dnf -y install pcsc-lite-ccid icedtea-web icecat java-1.8.0-openjdk-openjfx
+
+# systemctl start pcscd.socket
+&lt;/pre&gt;
+&lt;h2&gt;Descarga del “instalador”&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Descargar el “instalador” en el desplegable llamado “Usuarios Linux” en la página de descarga de instaladores del sitio web de &lt;a href="https://www.soportefirmadigital.com/"&gt;Soporte Firma Digital de Costa Rica&lt;/a&gt;, introduciendo el número de serie de la tarjeta y el captcha.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Desempaquetado del “instalador”&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Descomprimir el archivo zip descargado con &lt;kbd&gt;unzip&lt;/kbd&gt;, en el momento de escribir esta documentación se llama &lt;kbd&gt;sfd_ClientesLinux_Rev09.zip&lt;/kbd&gt;. Se creará una carpeta llamada &lt;kbd&gt;Firma Digital&lt;/kbd&gt;. Se asume que el archivo zip se ha descargado en la carpeta &lt;kbd&gt;Descargas&lt;/kbd&gt;:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+$ cd ~/Descargas
+
+$ unzip sfd_ClientesLinux_Rev09.zip
+&lt;/pre&gt;
+&lt;h2&gt;Instalación de los certificados&lt;/h2&gt;
+&lt;p&gt;Es necesario agregar a la lista de confianza la jerarquía de certificados del SINPE y del MICITT. Para ello, un par de comandos:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Copiar los certificados:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# cp ~/Descargas/Firma\ Digital/Certificados/* /usr/share/pki/ca-trust-source/anchors/
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Regenerar los archivos de certificados para todas las aplicaciones:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# update-ca-trust
+&lt;/pre&gt;
+&lt;h2&gt;Instalación del módulo PKCS#11&lt;/h2&gt;
+&lt;p&gt;Aunque hay un módulo en el directorio &lt;kbd&gt;Librerías&lt;/kbd&gt;, no es la versión más reciente y tiene varios defectos de enlazado. La versión distribuida en el paquete PinTool es más reciente y funciona correctamente en todos los programas probados. En el siguiente proceso se extrae y se instala conservando la fecha original de la librería y con los permisos correctos de usuario y de SELinux.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Instalar el módulo PKCS#11 propietario en &lt;kbd&gt;/usr/lib64/pkcs11&lt;/kbd&gt;:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+$ cd ~/Descargas/Firma\ Digital/PinTool/IDProtect\ PINTool\ 6.41.01/RPM
+
+$ rpm2cpio idprotectclient-641.01-0.x86_64.rpm | cpio -dim ./usr/lib/x64-athena/libASEP11.so
+&lt;/pre&gt;
+&lt;pre&gt;
+# mv usr/lib/x64-athena/libASEP11.so /usr/lib64/pkcs11/
+
+# chown root:root /usr/lib64/pkcs11/libASEP11.so
+
+# chmod 755 /usr/lib64/pkcs11/libASEP11.so
+
+# chcon system_u:object_r:lib_t:s0 /usr/lib64/pkcs11/libASEP11.so
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Crear los siguientes enlaces simbólicos (necesarios para que funcionen algunos programas y applets):&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# ln -s /usr/lib64/pkcs11/libASEP11.so /usr/lib64/
+
+# ln -s /usr/lib64/pkcs11/libASEP11.so /usr/lib/
+
+# mkdir -p /usr/lib/x64-athena/
+
+# ln -s /usr/lib64/pkcs11/libASEP11.so /usr/lib/x64-athena/
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Si se va a trabajar con el applet de la CCSS se puede realizar el siguiente paso opcional:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# mkdir -p /Firma_Digital/LIBRERIAS/
+
+# ln -s /usr/lib64/pkcs11/libASEP11.so /Firma_Digital/LIBRERIAS/
+
+# ln -s /usr/share/pki/ca-trust-source/anchors/ /Firma_Digital/CERTIFICADOS
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Crear el fichero /etc/Athena/IDPClientDB.xml y abrirlo para edición:
+&lt;/li&gt;&lt;/ul&gt;
+&lt;pre&gt;
+# mkdir /etc/Athena/
+
+# gedit /etc/Athena/IDPClientDB.xml
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;En la ventana del editor de textos gedit, pegar el siguiente texto, guardar y cerrar el editor:
+&lt;/li&gt;&lt;/ul&gt;
+&lt;pre&gt;&amp;lt;?xml version="1.0" encoding="utf-8" ?&amp;gt;
+&amp;lt;IDProtect&amp;gt;
+ &amp;lt;TokenLibs&amp;gt;
+  &amp;lt;IDProtect&amp;gt;
+   &amp;lt;Cards&amp;gt;
+    &amp;lt;IDProtectXF&amp;gt;
+     &amp;lt;ATR type='hexBinary'&amp;gt;3BDC00FF8091FE1FC38073C821106600000000000000&amp;lt;/ATR&amp;gt;
+     &amp;lt;ATRMask type='hexBinary'&amp;gt;FFFF00FFF0FFFFFFFFFFFFFFFFF0FF00000000000000&amp;lt;/ATRMask&amp;gt;
+    &amp;lt;/IDProtectXF&amp;gt;
+   &amp;lt;/Cards&amp;gt;
+  &amp;lt;/IDProtect&amp;gt;
+ &amp;lt;/TokenLibs&amp;gt;
+&amp;lt;/IDProtect&amp;gt;
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Crear un fichero llamado &lt;kbd&gt;/etc/pkcs11/modules/firmadigital.module&lt;/kbd&gt; y abrirlo para edición:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# gedit /etc/pkcs11/modules/firmadigital.module
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;En la ventana del editor de textos gedit, pegar el siguiente texto, guardar y cerrar el editor:
+&lt;/li&gt;&lt;/ul&gt;
+&lt;pre&gt;
+module: libASEP11.so
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Ejecutar el siguiente comando para reemplazar el enlace simbólico a &lt;kbd&gt;libnssckbi&lt;/kbd&gt; para que haga uso de &lt;kbd&gt;p11-kit-proxy&lt;/kbd&gt; de forma prioritaria:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;
+# alternatives --install /usr/lib64/libnssckbi.so libnssckbi.so.x86_64 /usr/lib64/p11-kit-proxy.so 50
+&lt;/pre&gt;
+&lt;p&gt;Eso es todo. Es necesario reiniciar Firefox, Evolution y cualquier otra aplicación que use certificados para que se apliquen los cambios. Si se ha insertado el lector y la tarjeta al lector, estas aplicaciones preguntarán por el PIN, lo que indicará que se la instalación ha sido exitosa.&lt;/p&gt;
+&lt;p&gt;Si el componente de firma del Banco Central está instalado debería funcionar para poder realizar la prueba de firma. El sitio web de Soporte Firma Digital podría usar todavía la prueba de Java y en este caso solamente funciona con el navegador Icecat. Icecat incluye varias extensiones que bloquean JavaScript y hay que desactivarlas para poder navegar en la mayoría de sitios y para poder firmar. En la página de prueba de firma con Java, si a la hora de firmar aparece en el navegador que se quiere ejecutar “IcedTea-Web”, hay que permitirlo. Si el navegador hace preguntas sobre el applet responder afirmativamente y aceptar a todos los cuadros de mensaje que aparezcan e ingresar el PIN cuando lo solicite.&lt;/p&gt;</description><category>Firma digital</category><category>Software libre</category><guid>http://jaquerespeis.org/posts/instalar-firma-digital-costa-rica-linux-fedora/</guid><pubDate>Thu, 14 Sep 2017 08:09:09 GMT</pubDate></item><item><title>HolaMundo con ethereum</title><link>http://jaquerespeis.org/posts/postsholamundo-ethereum/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;&lt;h2&gt;Lista de herramientas&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;testRPC&lt;/li&gt;
+&lt;li&gt;nvm&lt;/li&gt;
+&lt;li&gt;web3&lt;/li&gt;
+&lt;li&gt;geth&lt;/li&gt;
+&lt;li&gt;solc&lt;/li&gt;
+&lt;li&gt;web3&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Instalación&lt;/h2&gt;
+&lt;h3&gt;Linux&lt;/h3&gt;
+&lt;p&gt;Los siguientes pasos muestras como instalar las herramientas necesarias en Ubuntu 17.04&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+nvm ls-remote
+nvm install &amp;lt;la ultima LTS&amp;gt;
+npm install -g ethereumjs-testrpc
+npm install solc
+npm install web3
+&lt;/pre&gt;
+
+
+&lt;h3&gt;Mac&lt;/h3&gt;
+&lt;p&gt;Para instalar nvm es necesario tener &lt;a href="https://brew.sh/"&gt;brew&lt;/a&gt;&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;brew install nvm
+nvm ls-remote
+nvm install &amp;lt;la ultima LTS&amp;gt;
+npm install -g ethereumjs-testrpc
+npm install solc
+npm install web3
+&lt;/pre&gt;
+
+
+&lt;h2&gt;Desarrollo&lt;/h2&gt;
+&lt;p&gt;Con el editor preferido, escribir el contrato, para esto se va a utilizar el lenguage &lt;a href="https://solidity.readthedocs.io/en/develop/"&gt;&lt;strong&gt;solidity&lt;/strong&gt;&lt;/a&gt;, sin embargo existen otras opciones como &lt;a href="https://github.com/ethereum/wiki/wiki/Serpent"&gt;&lt;strong&gt;serpent&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Para compilar el contrato vamos a utilizar el comando &lt;code&gt;solc --bin --optimize &amp;lt;archivo.sol&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Escribit el siguiente contrato en un archivo llamado Voting.sol&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;pragma solidity ^0.4.11;
+// We have to specify what version of compiler this code will compile with
+
+contract Voting {
+  /* mapping field below is equivalent to an associative array or hash.
+  The key of the mapping is candidate name stored as type bytes32 and value is
+  an unsigned integer to store the vote count
+  */
+
+  mapping (bytes32 =&amp;gt; uint8) public votesReceived;
+
+  /* Solidity doesn't let you pass in an array of strings in the constructor (yet).
+  We will use an array of bytes32 instead to store the list of candidates
+  */
+
+  bytes32[] public candidateList;
+
+  /* This is the constructor which will be called once when you
+  deploy the contract to the blockchain. When we deploy the contract,
+  we will pass an array of candidates who will be contesting in the election
+  */
+  function Voting(bytes32[] candidateNames) {
+    candidateList = candidateNames;
+  }
+
+  // This function returns the total votes a candidate has received so far
+  function totalVotesFor(bytes32 candidate) returns (uint8) {
+    if (validCandidate(candidate) == false) throw;
+    return votesReceived[candidate];
+  }
+
+  // This function increments the vote count for the specified candidate. This
+  // is equivalent to casting a vote
+  function voteForCandidate(bytes32 candidate) {
+    if (validCandidate(candidate) == false) throw;
+    votesReceived[candidate] += 1;
+  }
+
+  function validCandidate(bytes32 candidate) returns (bool) {
+    for(uint i = 0; i &amp;lt; candidateList.length; i++) {
+      if (candidateList[i] == candidate) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+&lt;/pre&gt;
+
+
+&lt;h3&gt;Pasos para desplegar el contrato&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Ejecutar node&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Mientras se ejecutan los comandos, se puede ver su salida y analizarla.&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nx"&gt;Web3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'web3'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nx"&gt;web3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;Web3&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;Web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;providers&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;HttpProvider&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"http://localhost:8545"&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;Listar las cuentas existentes en la red&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;accounts&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;Compilar el código &lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nx"&gt;code&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;fs&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;readFileSync&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Voting.sol'&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;toString&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="nx"&gt;solc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'solc'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nx"&gt;compiledCode&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;solc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;compile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;code&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nx"&gt;abiDefinition&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;JSON&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;parse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;compiledCode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;contracts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;':Voting'&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="kr"&gt;interface&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nx"&gt;VotingContract&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;contract&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;abiDefinition&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nx"&gt;byteCode&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;compiledCode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;contracts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;':Voting'&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nx"&gt;bytecode&lt;/span&gt;
+&lt;span class="nx"&gt;deployedContract&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;VotingContract&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;'Nick'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;'Jose'&lt;/span&gt;&lt;span class="p"&gt;],{&lt;/span&gt;&lt;span class="nx"&gt;data&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;byteCode&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;accounts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="nx"&gt;gas&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;4700000&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="nx"&gt;deployedContract&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;address&lt;/span&gt;
+&lt;span class="nx"&gt;contractInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;VotingContract&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;at&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;deployedContract&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;address&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;contractInstance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;totalVotesFor&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;'0'&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="nx"&gt;s&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;c&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;contractInstance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;voteForCandidate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;from&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;accounts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]})&lt;/span&gt;
+
+&lt;span class="s1"&gt;'0xdedc7ae544c3dde74ab5a0b07422c5a51b5240603d31074f5b75c0ebc786bf53'&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;contractInstance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;voteForCandidate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;from&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;accounts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]})&lt;/span&gt;
+
+&lt;span class="s1"&gt;'0x02c054d238038d68b65d55770fabfca592a5cf6590229ab91bbe7cd72da46de9'&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;contractInstance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;voteForCandidate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;from&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;web3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eth&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;accounts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]})&lt;/span&gt;
+
+&lt;span class="s1"&gt;'0x3da069a09577514f2baaa11bc3015a16edf26aad28dffbcd126bde2e71f2b76f'&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="nx"&gt;contractInstance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;totalVotesFor&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;call&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Rama'&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;toLocaleString&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="s1"&gt;'3'&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;h2&gt;Opcodes de la EVM&lt;/h2&gt;
+&lt;h3&gt;0s: Stop and Arithmetic Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x00    STOP        Halts execution
+0x01    ADD         Addition operation
+0x02    MUL         Multiplication operation
+0x03    SUB         Subtraction operation
+0x04    DIV         Integer division operation
+0x05    SDIV        Signed integer
+0x06    MOD         Modulo
+0x07    SMOD        Signed modulo
+0x08    ADDMOD      Modulo
+0x09    MULMOD      Modulo
+0x0a    EXP         Exponential operation
+0x0b    SIGNEXTEND  Extend length of two's complement signed integer
+&lt;/pre&gt;
+
+
+&lt;h3&gt;10s: Comparison &amp;amp; Bitwise Logic Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x10    LT      Lesser-than comparison
+0x11    GT      Greater-than comparison
+0x12    SLT     Signed less-than comparison
+0x13    SGT     Signed greater-than comparison
+0x14    EQ      Equality  comparison
+0x15    ISZERO  Simple not operator
+0x16    AND     Bitwise AND operation
+0x17    OR      Bitwise OR operation
+0x18    XOR     Bitwise XOR operation
+0x19    NOT     Bitwise NOT operation
+0x1a    BYTE    Retrieve single byte from word
+&lt;/pre&gt;
+
+
+&lt;h3&gt;20s: SHA3&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x20    SHA3    Compute Keccak-256 hash
+&lt;/pre&gt;
+
+
+&lt;h3&gt;30s: Environmental Information&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x30    ADDRESS         Get address of currently executing account
+0x31    BALANCE         Get balance of the given account
+0x32    ORIGIN          Get execution origination address
+0x33    CALLER          Get caller address. This is the address of the account that is directly responsible for this execution
+0x34    CALLVALUE       Get deposited value by the instruction/transaction responsible for this execution
+0x35    CALLDATALOAD    Get input data of current environment
+0x36    CALLDATASIZE    Get size of input data in current environment
+0x37    CALLDATACOPY    Copy input data in current environment to memory This pertains to the input data passed with the message call instruction or transaction
+0x38    CODESIZE        Get size of code running in current environment
+0x39    CODECOPY        Copy code running in current environment to memory
+0x3a    GASPRICE        Get price of gas in current environment
+0x3b    EXTCODESIZE     Get size of an account's code
+0x3c    EXTCODECOPY     Copy an account's code to memory
+&lt;/pre&gt;
+
+
+&lt;h3&gt;40s: Block Information&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x40    BLOCKHASH   Get the hash of one of the 256 most recent complete blocks
+0x41    COINBASE    Get the block's beneficiary address
+0x42    TIMESTAMP   Get the block's timestamp
+0x43    NUMBER      Get the block's number
+0x44    DIFFICULTY  Get the block's difficulty
+0x45    GASLIMIT    Get the block's gas limit
+&lt;/pre&gt;
+
+
+&lt;h3&gt;50s Stack, Memory, Storage and Flow Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x50    POP         Remove item from stack
+0x51    MLOAD       Load word from memory
+0x52    MSTORE      Save word to memory
+0x53    MSTORE8     Save byte to memory
+0x54    SLOAD       Load word from storage
+0x55    SSTORE      Save word to storage
+0x56    JUMP        Alter the program counter
+0x57    JUMPI       Conditionally alter the program counter
+0x58    PC          Get the value of the program counter prior to the increment
+0x59    MSIZE       Get the size of active memory in bytes
+0x5a    GAS         Get the amount of available gas, including the corresponding reduction
+0x5b    JUMPDEST    Mark a valid destination for jumps
+&lt;/pre&gt;
+
+
+&lt;h3&gt;60s &amp;amp; 70s: Push Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x60    PUSH1   Place 1 byte item on stack
+0x61    PUSH2   Place 2-byte item on stack
+…
+0x7f    PUSH32  Place 32-byte (full word) item on stack
+&lt;/pre&gt;
+
+
+&lt;h3&gt;80s: Duplication Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x80    DUP1    Duplicate 1st stack item
+0x81    DUP2    Duplicate 2nd stack item
+…
+0x8f    DUP16   Duplicate 16th stack item
+&lt;/pre&gt;
+
+
+&lt;h3&gt;90s: Exchange Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0x90    SWAP1   Exchange 1st and 2nd stack items
+0x91    SWAP2   Exchange 1st and 3rd stack items
+…   …
+0x9f    SWAP16  Exchange 1st and 17th stack items
+&lt;/pre&gt;
+
+
+&lt;h3&gt;a0s: Logging Operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0xa0    LOG0    Append log record with no topics
+0xa1    LOG1    Append log record with one topic
+…   …
+0xa4    LOG4    Append log record with four topics
+&lt;/pre&gt;
+
+
+&lt;h3&gt;f0s: System operations&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0xf0    CREATE          Create a new account with associated code
+0xf1    CALL            Message-call into an account
+0xf2    CALLCODE        Message-call into this account with alternative account's code
+0xf3    RETURN          Halt execution returning output data
+0xf4    DELEGATECALL    Message-call into this account with an alternative account's code, but persisting the current values for `sender` and `value`
+&lt;/pre&gt;
+
+
+&lt;h3&gt;Halt Execution, Mark for deletion&lt;/h3&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;0xff    SELFDESTRUCT    Halt execution and register account for later deletion
+&lt;/pre&gt;
+
+
+&lt;h2&gt;Referencias&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;https://github.com/creationix/nvm&lt;/li&gt;
+&lt;li&gt;https://github.com/ethereumjs/testrpc&lt;/li&gt;
+&lt;li&gt;https://en.wikipedia.org/wiki/Remote_procedure_call&lt;/li&gt;
+&lt;li&gt;http://ethdocs.org/en/latest/network/test-networks.html&lt;/li&gt;
+&lt;li&gt;https://medium.com/@doart3/ethereum-dapps-without-truffle-compile-deploy-use-it-e6daeefcf919&lt;/li&gt;
+&lt;li&gt;https://medium.com/@mvmurthy/full-stack-hello-world-voting-ethereum-dapp-tutorial-part-1-40d2d0d807c2&lt;/li&gt;
+&lt;li&gt;https://github.com/ethereum/yellowpaper&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Notas&lt;/h2&gt;
+&lt;p&gt;testrpc -n5&lt;/p&gt;&lt;/div&gt;</description><category>ethereum</category><category>jaquerespeis</category><category>smart contracts</category><guid>http://jaquerespeis.org/posts/postsholamundo-ethereum/</guid><pubDate>Wed, 19 Jul 2017 11:07:00 GMT</pubDate></item><item><title>An errbot snap for simplified chatops</title><link>http://jaquerespeis.org/posts/esblogerrbot-snap/</link><dc:creator>JáquerEspeis</dc:creator><description>&lt;div&gt;&lt;p&gt;I'm a Quality Assurance Engineer. A big part of my job is to find problems,
+then make sure that they are fixed and &lt;em&gt;automated&lt;/em&gt; so they don't regress. If I
+do my job well, then our process will identify new and potential problems early
+&lt;em&gt;without manual intervention&lt;/em&gt; from anybody in the team. It's like trying to
+automate myself, everyday, until I'm no longer needed and have to jump to
+another project.&lt;/p&gt;
+&lt;p&gt;However, as we work in the project, it's unavoidable that many small manual
+tasks accumulate on my hands. This happens because I set up the continuous
+integration infrastructure, so I'm the one who knows more about it and have
+easier access, or because I'm the one who requested access to the build farm
+so I'm the one with the password, or because I configured the staging
+environment and I'm the only one who knows the details. This is a great way
+to achieve job security, but it doesn't lead us to higher quality. It's a job
+half done, and it's terribly boring to be a bottleneck and a silo of
+information about testing and the release process. All of these tasks should be
+shared by the whole team, as with all the other tasks in the project.&lt;/p&gt;
+&lt;p&gt;There are two problems. First, most of these tasks involve delicate credentials
+that shouldn't be freely shared with everybody. Second, even if the task itself
+is simple and quick to execute, it's not very simple to document how to set up
+the environment to be able to execute them, nor how to make sure that the right
+task is executed in the right moment.&lt;/p&gt;
+&lt;p&gt;Chatops is how I like to solve all of this. The idea is that every task that
+requires manual intervention is implemented in a script that can be executed by
+a bot. This bot joins the communication channel where the entire team is
+present, and it will execute the tasks and report about their results as a
+response to external events that happen somewhere in the project
+infrastructure, or as a response to the direct request of a team member in the
+channel. The credentials are kept safe, they only have to be shared with the
+bot and the permissions can be handled with access control lists or membership
+to the channel. And the operative knowledge is shared with all the team,
+because they are all listening in the same channel with the bot. This means
+that anybody can execute the tasks, and the bot assists them to make it simple.&lt;/p&gt;
+&lt;p&gt;In snapcraft we started writing our bot not so long ago. It's called snappy-m-o
+(&lt;a href="http://pixar.wikia.com/wiki/M-O"&gt;Microbe Obliterator&lt;/a&gt;), and it's written
+in python with &lt;a href="http://errbot.io/"&gt;errbot&lt;/a&gt;. We, of course, packaged it as a
+snap so we have automated delivery every time we change it's source code, and
+the bot is also autoupdated in the server, so in the chat we are always
+interacting with the latest and greatest.&lt;/p&gt;
+&lt;p&gt;Let me show you how we started it, in case you want to get your own. But let's
+call this one Baymax, and let's make a virtual environment with errbot, to
+experiment.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://upload.wikimedia.org/wikipedia/en/2/2c/Baymax_from_Disney%27s_Big_Hero_6.png"&gt;&lt;img alt="drawing of the Baymax bot" src="https://upload.wikimedia.org/wikipedia/en/2/2c/Baymax_from_Disney%27s_Big_Hero_6.png"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;$ mkdir -p ~/workspace/baymax
+$ &lt;span class="nb"&gt;cd&lt;/span&gt; ~/workspace/baymax
+$ sudo apt install python3-venv
+$ python3 -m venv .venv
+$ &lt;span class="nb"&gt;source&lt;/span&gt; .venv/bin/activate
+$ pip install errbot
+$ errbot --init
+&lt;/pre&gt;
+
+
+&lt;p&gt;The last command will initialize this bot with a super simple plugin, and
+will configure it to work in text mode. This means that the bot won't be
+listening on any channel, you can just interact with it through the command
+line (the ops, without the chat). Let's try it:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;$ errbot
+&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; !help
+All commands
+&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
+!tryme - Execute to check &lt;span class="k"&gt;if&lt;/span&gt; Errbot responds to command.
+&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; !tryme
+It works !
+&amp;gt;&amp;gt;&amp;gt; !shutdown --confirm
+&lt;/pre&gt;
+
+
+&lt;p&gt;&lt;code&gt;tryme&lt;/code&gt; is the command provided by the example plugin that &lt;code&gt;errbot --init&lt;/code&gt;
+created. Take a look at the file &lt;code&gt;plugins/err-example/example.py&lt;/code&gt;, errbot is
+just lovely. In order to define your own plugin you will just need a class that
+inherits from &lt;code&gt;errbot.BotPlugin&lt;/code&gt;, and the commands are methods decorated with
+&lt;code&gt;@errbot.botcmd&lt;/code&gt;. I won't dig into how to write plugins, because they have an
+amazing
+&lt;a href="http://errbot.io/en/latest/user_guide/plugin_development/index.html"&gt;documentation about Plugin development&lt;/a&gt;.
+You can also read the plugins we have in our snappy-m-o, one for
+&lt;a href="https://github.com/elopio/snappy-m-o/blob/master/plugins/autopkgtest_github/autopkgtest_github.py"&gt;triggering autopkgtests on GitHub pull requests&lt;/a&gt;,
+and the other for
+&lt;a href="https://github.com/elopio/snappy-m-o/blob/master/plugins/snapcraft_github/snapcraft_github.py"&gt;subscribing to the results of the pull requests tests&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Let's change the config of Baymax to put it in an IRC chat:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;$ pip install irc
+&lt;/pre&gt;
+
+
+&lt;p&gt;And in the &lt;code&gt;config.py&lt;/code&gt; file, set the following values:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;BACKEND = 'IRC'
+BOT_IDENTITY = {
+    'nickname' : 'baymax-elopio',  # Nicknames need to be unique, so append your own.
+                                   # Remember to replace 'elopio' with your nick everywhere
+                                   # from now on.
+    'server' : 'irc.freenode.net',
+}
+CHATROOM_PRESENCE = ('#snappy',)
+&lt;/pre&gt;
+
+
+&lt;p&gt;Run it again with the errbot command, but this time join the #snappy channel
+in irc.freenode.net, and write in there &lt;code&gt;!tryme&lt;/code&gt;. It works ! :)&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://archive.org/download/elopio-screenshots2/errbot/errbot-snap.png"&gt;&lt;img alt="screenshot of errbot on IRC" src="https://archive.org/download/elopio-screenshots2/errbot/errbot-snap.png"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;So, this is very simple, but let's package it now to start with the good
+practice of continuous delivery before it gets more complicated. As usual, it
+just requires a &lt;code&gt;snapcraft.yaml&lt;/code&gt; file with all the packaging info and metadata:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;baymax&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;elopio&lt;/span&gt;
+&lt;span class="n"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;'0.1-dev'&lt;/span&gt;
+&lt;span class="n"&gt;summary&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt; &lt;span class="n"&gt;bot&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;errbot&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;description&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Chat&lt;/span&gt; &lt;span class="n"&gt;ops&lt;/span&gt; &lt;span class="n"&gt;bot&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;my&lt;/span&gt; &lt;span class="n"&gt;team&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;grade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;stable&lt;/span&gt;
+&lt;span class="n"&gt;confinement&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;strict&lt;/span&gt;
+
+&lt;span class="n"&gt;apps&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;baymax&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;elopio&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;command&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;env&lt;/span&gt; &lt;span class="n"&gt;LC_ALL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;UTF&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt; &lt;span class="n"&gt;errbot&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;$SNAP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;py&lt;/span&gt;
+    &lt;span class="n"&gt;plugs&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;network&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;network&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;bind&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;parts&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;errbot&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;plugin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;
+    &lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;packages&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;errbot&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;irc&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+  &lt;span class="n"&gt;baymax&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt;
+    &lt;span class="n"&gt;plugin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;dump&lt;/span&gt;
+    &lt;span class="n"&gt;stage&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+      &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;py&lt;/span&gt;
+      &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;plugins&lt;/span&gt;
+    &lt;span class="n"&gt;after&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;errbot&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;And we need to change a few more values in &lt;code&gt;config.py&lt;/code&gt; to make sure that the
+bot is relocatable, that we can run it in the isolated snap environment, and
+that we can add plugins after it has been installed:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+&lt;span class="n"&gt;BOT_DATA_DIR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'SNAP_USER_DATA'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;BOT_EXTRA_PLUGIN_DIR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'SNAP'&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s1"&gt;'plugins'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;BOT_LOG_FILE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BOT_DATA_DIR&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;'/err.log'&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;One final try, this time from the snap:&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt install snapcraft
+$ snapcraft
+$ sudo snap install baymax*.snap --dangerous
+$ baymax-elopio
+&lt;/pre&gt;
+
+
+&lt;p&gt;And go back to IRC to check.&lt;/p&gt;
+&lt;p&gt;Last thing would be to push the source code we have just written to a GitHub
+repo, and enable the continuous delivery in build.snapcraft.io. Go to your
+server and install the bot with &lt;code&gt;sudo snap install baymax-elopio --edge&lt;/code&gt;.
+Now everytime somebody from your team makes a change in the master repo in
+GitHub, the bot in your server will be automatically updated to get those
+changes within a few hours without any work from your side.&lt;/p&gt;
+&lt;p&gt;If you are into chatops, make sure that every time you do a manual task, you
+also plan for some time to turn that task into a script that can be executed
+by your bot. And get ready to enjoy tons and tons of free time, or just keep
+going through those &lt;a href="https://bugs.launchpad.net/snapcraft"&gt;400 open bugs&lt;/a&gt;,
+whichever you prefer :)&lt;/p&gt;&lt;/div&gt;</description><guid>http://jaquerespeis.org/posts/esblogerrbot-snap/</guid><pubDate>Wed, 12 Jul 2017 10:07:00 GMT</pubDate></item></channel></rss>
